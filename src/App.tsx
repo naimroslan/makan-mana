@@ -118,10 +118,10 @@ function App() {
       <div className="absolute bottom-[-30%] right-[-20%] w-[600px] h-[600px] rounded-full bg-blue-200/50 blur-[120px]" />
       
       {/* Main content wrapper */}
-      <div className="flex-1 w-full flex flex-col items-center justify-center gap-8 p-4">
+      <div className="flex-1 w-full flex flex-col items-left justify-center gap-8 p-4">
       <button
         onClick={() => setShowFilterModal(true)}
-        className="w-full max-w-md py-2 px-4 rounded-xl text-white font-bold text-lg bg-blue-600 hover:bg-blue-700 active:transform active:scale-95 shadow-lg relative z-20"
+        className="w-1/3 max-w-md py-2 px-4 rounded-xl text-gray-700 font-semibold text-lg hover:bg-gray-700 active:transform active:scale-95 relative z-20"
       >
         Filter
       </button>
@@ -173,7 +173,7 @@ function App() {
       </div>
 
       {showFilterModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl p-6 w-full max-w-md">
             <h2 className="text-xl font-bold mb-4">Filter Options</h2>
             <div className="space-y-2">
