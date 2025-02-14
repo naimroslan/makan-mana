@@ -43,6 +43,35 @@ function App() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isRolling, setIsRolling] = useState(false);
   const [selectedRestaurant, setSelectedRestaurant] = useState<string | null>(null);
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [filters, setFilters] = useState({
+    all: true,
+    sunwayPutra: false,
+    trx: false,
+    nearby: false
+  });
+
+  const handleFilterChange = (filterKey: string) => {
+    setFilters(prevFilters => {
+      const newFilters = { ...prevFilters };
+      if (filterKey === 'all') {
+        newFilters.all = !newFilters.all;
+        if (newFilters.all) {
+          newFilters.sunwayPutra = false;
+          newFilters.trx = false;
+          newFilters.nearby = false;
+        }
+      } else {
+        newFilters[filterKey] = !newFilters[filterKey];
+        if (newFilters.sunwayPutra && newFilters.trx && newFilters.nearby) {
+          newFilters.all = true;
+        } else {
+          newFilters.all = false;
+        }
+      }
+      return newFilters;
+    });
+  };
 
   const rollRestaurants = () => {
     if (isRolling || !containerRef.current) return;
@@ -77,7 +106,6 @@ function App() {
   };
 
   useEffect(() => {
-    // Initial setup
     if (containerRef.current) {
       gsap.set(containerRef.current, { y: 0 });
     }
@@ -90,7 +118,13 @@ function App() {
       <div className="absolute bottom-[-30%] right-[-20%] w-[600px] h-[600px] rounded-full bg-blue-200/50 blur-[120px]" />
       
       {/* Main content wrapper */}
-      <div className="flex-1 w-full flex flex-col items-center justify-center gap-8 p-4">
+      <div className="flex-1 w-full flex flex-col items-left justify-center gap-8 p-4">
+      <button
+        onClick={() => setShowFilterModal(true)}
+        className="w-1/3 max-w-md py-2 px-4 rounded-xl text-gray-700 font-semibold text-lg hover:bg-gray-700 active:transform active:scale-95 relative z-20"
+      >
+        Filter
+      </button>
         {/* Restaurant list card */}
         <div className="w-full max-w-md bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden">
           <div className="relative h-[180px] overflow-hidden bg-white">
@@ -137,6 +171,58 @@ function App() {
           {isRolling ? 'Rolling...' : 'Makan mana?'}
         </button>
       </div>
+
+      {showFilterModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">Filter Options</h2>
+            <div className="space-y-2">
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={filters.all}
+                  onChange={() => handleFilterChange('all')}
+                  className="mr-2"
+                />
+                All
+              </label>
+              <label className="flex items-center">
+                <input 
+                  type="checkbox"
+                  checked={filters.sunwayPutra}
+                  onChange={() => handleFilterChange('sunwayPutra')}
+                  className="mr-2"
+                />
+                Sunway Putra
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={filters.trx}
+                  onChange={() => handleFilterChange('trx')}
+                  className="mr-2"
+                />
+                TRX
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={filters.nearby}
+                  onChange={() => handleFilterChange('nearby')}
+                  className="mr-2"
+                />
+                Nearby
+              </label>
+            </div>
+            <button
+              onClick={() => setShowFilterModal(false)}
+              className="mt-4 w-full py-2 px-4 rounded-xl text-white font-bold text-lg bg-purple-600 hover:bg-purple-700 active:transform active:scale-95 shadow-lg"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <div className="w-full text-center py-4 text-gray-400 text-sm">
