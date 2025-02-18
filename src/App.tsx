@@ -1,43 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
-
-const restaurants = [
-  "A&W",
-  "Absolute Thai",
-  "Ah Cheng Laksa",
-  "Ayam Penyet Best",
-  "Ayam Penyet Express",
-  "Ayla Steakhouse",
-  "BananaBro",
-  "Boat Noodle",
-  "Bungkus Kaw Kaw",
-  "Burger King",
-  "Chicken Plus",
-  "Chili's",
-  "Dolly Dim Sum",
-  "Dubuyo",
-  "Grill Teppanyaki",
-  "Kedey Kamek",
-  "Kenny Roger Roasters",
-  "KFC",
-  "Mee Hiris",
-  "Mr Dakgalbi",
-  "MyeongDong Topokki",
-  "Nando's",
-  "Onde Onde",
-  "Pak Nik Burger",
-  "Secret Recipe",
-  "Serai",
-  "Sukiya Tokyo Bowls",
-  "Super Saigon",
-  "Sushi Kazoku",
-  "Sushi King",
-  "Texas Chicken",
-  "The Chicken Rice Shop",
-  "The Manhattan Fish Market",
-  "Toast Maker",
-  "Vivo Pizza"
-];
+import data from './data/restraurants.json';
 
 function App() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -50,6 +13,34 @@ function App() {
     trx: false,
     nearby: false
   });
+
+  // function to dynamically get filtered restaurant names
+  const getFilteredRestaurants = () => {
+    let filteredRestaurants: { name: string }[] = [];
+
+    if (filters.all) {
+      // If "All" is selected, merge all restaurant lists
+      Object.values(data).forEach((mallRestaurants) => {
+        filteredRestaurants = filteredRestaurants.concat(mallRestaurants);
+      });
+    } else {
+      // Add only selected malls
+      if (filters.sunwayPutra) {
+        filteredRestaurants = filteredRestaurants.concat(data.sunwayputra);
+      }
+      if (filters.trx) {
+        filteredRestaurants = filteredRestaurants.concat(data.trx);
+      }
+      if (filters.nearby) {
+        filteredRestaurants = filteredRestaurants.concat(data.nearby);
+      }
+    }
+
+    return filteredRestaurants.map((restaurant) => restaurant.name);
+  };
+
+  // use function to get restaurants dynamically
+  const restaurants = getFilteredRestaurants();
 
   const handleFilterChange = (filterKey: string) => {
     setFilters(prevFilters => {
@@ -118,10 +109,10 @@ function App() {
       <div className="absolute bottom-[-30%] right-[-20%] w-[600px] h-[600px] rounded-full bg-blue-200/50 blur-[120px]" />
       
       {/* Main content wrapper */}
-      <div className="flex-1 w-full flex flex-col items-left justify-center gap-8 p-4">
+      <div className="flex-1 w-full flex flex-col items-start justify-center gap-8 p-4 md:pl-10">
       <button
         onClick={() => setShowFilterModal(true)}
-        className="w-1/3 max-w-md py-2 px-4 rounded-xl text-gray-700 font-semibold text-lg hover:bg-gray-700 active:transform active:scale-95 relative z-20"
+        className="w-1/3 max-w-md py-2 px-4 rounded-xl text-gray-700 font-semibold text-lg hover:bg-gray-100 active:transform active:scale-95 relative z-20"
       >
         Filter
       </button>

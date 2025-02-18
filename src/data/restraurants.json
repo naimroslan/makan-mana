@@ -1,0 +1,50 @@
+{
+  "sunwayputra": [
+    { "name": "A&W", "category": ["western", "burger", "chicken"] },
+    { "name": "Absolute Thai", "category": "thai" },
+    { "name": "Ah Cheng Laksa", "category": ["malaysian", "noodle"] },
+    { "name": "Ayam Penyet Best", "category": "indonesian" },
+    { "name": "Ayam Penyet Express", "category": "indonesian" },
+    { "name": "Ayla Steakhouse", "category": "western" },
+    { "name": "BananaBro", "category": "malaysian" },
+    { "name": "Boat Noodle", "category": ["thai", "noodle"] },
+    { "name": "Bungkus Kaw Kaw", "category": "malaysian" },
+    { "name": "Burger King", "category": ["western", "burger"] },
+    { "name": "Chicken Plus", "category": ["korean", "chicken"] },
+    { "name": "Chili's", "category": "western" },
+    { "name": "Dolly Dim Sum", "category": "chinese" },
+    { "name": "Dubuyo", "category": "korean" },
+    { "name": "Grill Teppanyaki", "category": "japanese" },
+    { "name": "Kedey Kamek", "category": "malaysian" },
+    { "name": "Kenny Roger Roasters", "category": ["western", "chicken"] },
+    { "name": "KFC", "category": ["western", "chicken"] },
+    { "name": "Mee Hiris", "category": ["chinese", "chicken"] },
+    { "name": "Mr Dakgalbi", "category": "korean" },
+    { "name": "MyeongDong Topokki", "category": "korean" },
+    { "name": "Nando's", "category": ["western", "chicken"] },
+    { "name": "Onde Onde", "category": "malaysian" },
+    { "name": "Pak Nik Burger", "category": ["malaysian", "burger"] },
+    { "name": "Secret Recipe", "category": "malaysian" },
+    { "name": "Serai", "category": "malaysian" },
+    { "name": "Sukiya Tokyo Bowls", "category": "japanese" },
+    { "name": "Super Saigon", "category": "vietnamese" },
+    { "name": "Sushi Kazoku", "category": "japanese" },
+    { "name": "Sushi King", "category": "japanese" },
+    { "name": "Texas Chicken", "category": ["western", "chicken"] },
+    { "name": "The Chicken Rice Shop", "category": "malaysian" },
+    { "name": "The Manhattan Fish Market", "category": "western" },
+    { "name": "Toast Maker", "category": "malaysian" },
+    { "name": "Vivo Pizza", "category": "italian" }
+  ],
+  "trx": [
+    { "name": "Food Court TRX", "category": "variety"},
+    { "name": "Hot Bird", "category": "chicken" },
+    { "name": "Shake Shack", "category": "burger" }
+  ],
+  "nearby": [
+    { "name": "Ayam Kampung/Bihun Sup", "category": "variety" },
+    { "name": "Sara Thai", "category": "variety" },
+    { "name": "Amanee", "category": "thai" },
+    { "name": "FNX Cafe", "category": "variety" }
+  ]
+}
