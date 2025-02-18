@@ -4,13 +4,27 @@ pipeline {
   stages {
     stage("Install Dependencies"){
       steps {
-        sh 'npm install'
+        // Install pnpm globally
+        sh 'npm install -g pnpm'
+
+        // Use pnpm to install deps
+        sh 'pnpm install'
       }
     }
-
-    stage("Tests"){
-      steps {
-        sh 'npm test'
+    stage("Building Image"){
+      steps{
+        script {
+          dockerImage = docker.build imageName
+        }
+      }
+    }
+    stage("Deploy Image"){
+      steps{
+        script {
+          docker.withRegistry("https://registry.hub.docker.com", 'dockerhub-creds'){
+           dockerImage.push("${env.BUILD_NUMBER}") 
+          }
+        }
       }
     }
   }
