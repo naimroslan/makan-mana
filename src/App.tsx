@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 
 import { FilterButton } from './components/FilterButton';
-import { ChatButton } from './components/ChatButton';
+// import { ChatButton } from './components/ChatButton';
 
 function App() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -106,7 +106,7 @@ function App() {
         </div>
       </main>
 
-      <ChatButton />
+      {/* <ChatButton /> */}
 
       {/* Footer */}
       <div className="w-full text-center py-10 text-gray-400 text-sm">
