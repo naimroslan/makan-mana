@@ -2,23 +2,21 @@ FROM node:20-alpine
 
 WORKDIR /src
 
-# Install pnpm globally
-# RUN corepack enable && npm install -g pnpm
+# Enable Corepack (ensures pnpm is available)
+RUN corepack enable
 
 # Copy package manager files
 COPY package.json pnpm-lock.yaml ./
 
-# Install dependencies using pnpm
+# Install dependencies
 RUN pnpm install --frozen-lockfile
 
 # Copy the rest of the app
 COPY . .
 
-# Build the project (if necessary)
-RUN npm run build
+# Build the app
+RUN pnpm run build
 
-# Expose the correct port
-EXPOSE 3002
+EXPOSE 3000
 
-# Start the application
-CMD [ "pnpm", "start" ]
+CMD ["pnpm", "run", "start"]
