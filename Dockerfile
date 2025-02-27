@@ -3,7 +3,7 @@ FROM node:20-alpine
 WORKDIR /src
 
 # Install pnpm globally
-RUN corepack enable && npm install -g pnpm
+# RUN corepack enable && npm install -g pnpm
 
 # Copy package manager files
 COPY package.json pnpm-lock.yaml ./
