@@ -2,8 +2,8 @@ FROM node:20-alpine
 
 WORKDIR /src
 
-# Enable Corepack (ensures pnpm is available)
-RUN corepack enable
+# Install pnpm manually
+RUN npm install -g pnpm@latest
 
 # Copy package manager files
 COPY package.json pnpm-lock.yaml ./
