@@ -20,8 +20,8 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t naimroslan/makan-mana:latest .
+          docker build -t heyitsnaim/makan-mana:latest .
 
       - name: Push Docker image to Docker Hub
         run: |
-          docker push naimroslan/makan-mana:latest
+          docker push heyitsnaim/makan-mana:latest
