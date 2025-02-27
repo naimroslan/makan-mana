@@ -8,7 +8,7 @@
     "build": "rsbuild build",
     "lint": "eslint .",
     "preview": "rsbuild preview",
-    "start": "rsbuild preview --host 0.0.0.0 --port 3000"
+    "start": "rsbuild preview --host 0.0.0.0 --port 3002"
   },
   "dependencies": {
     "gsap": "^3.12.5",
