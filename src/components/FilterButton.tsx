@@ -75,7 +75,7 @@ export function FilterButton({ onRestaurantsChange }: FilterButtonProps){
     <>
       <button
         onClick={() => setShowFilterModal(true)}
-        className="w-full md:w-1/3 max-w-md py-2 px-4 rounded-xl text-gray-700 font-semibold text-lg 
+        className="w-full md:w-1/3 max-w-md py-2 px-4 rounded-xl text-primary font-semibold text-lg 
           hover:bg-gray-100 active:transform active:scale-95 transition-all"
       >
         Filter
