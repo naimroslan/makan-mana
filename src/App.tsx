@@ -95,10 +95,10 @@ function App() {
             onClick={rollRestaurants}
             disabled={isRolling}
             className={`w-full py-4 px-6 rounded-xl text-white font-semibold text-xl 
-              transition-all border-2 border-primary-light ${
-                isRolling 
-                  ? 'bg-gray-400 cursor-not-allowed' 
-                  : 'bg-secondary active:transform active:scale-95'
+              transition-all ${
+                isRolling
+                  ? 'bg-gray-400 border-2 border-gray-400 cursor-not-allowed' 
+                  : 'bg-secondary border-2 border-primary-light active:transform active:scale-95'
               }`}
           >
             {isRolling ? 'Rolling...' : 'Makan mana?'}
