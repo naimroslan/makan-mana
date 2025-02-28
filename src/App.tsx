@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 
 import { FilterButton } from './components/FilterButton';
-// import { ChatButton } from './components/ChatButton';
+import { ChatDrawer } from './components/ChatDrawer';
 
 function App() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -46,14 +46,14 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-light flex flex-col">
       {/* Background gradients */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+      {/* <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-0 w-[500px] h-[500px] -translate-x-1/4 -translate-y-1/4 
           rounded-full bg-purple-200/50 blur-[100px]" />
         <div className="absolute bottom-0 right-0 w-[600px] h-[600px] translate-x-1/4 translate-y-1/4 
           rounded-full bg-blue-200/50 blur-[120px]" />
-      </div>
+      </div> */}
       
       {/* Main content wrapper */}
       <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 relative">
@@ -61,7 +61,7 @@ function App() {
           <FilterButton onRestaurantsChange={setRestaurants} />
           
           {/* Restaurant list card */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden">
+          <div className="bg-light rounded-2xl overflow-hidden border-2 border-primary-light">
             <div className="relative h-[180px] overflow-hidden bg-white">
               <div className="absolute inset-x-0 top-0 h-[60px] bg-gradient-to-b from-white to-transparent z-10" />
               <div className="absolute inset-x-0 bottom-0 h-[60px] bg-gradient-to-t from-white to-transparent z-10" />
@@ -71,7 +71,7 @@ function App() {
                   <div
                     key={index}
                     className={`h-[60px] flex items-center justify-center text-xl font-semibold
-                      ${selectedRestaurant === restaurant ? 'text-purple-600' : 'text-gray-700 opacity-30'}
+                      ${selectedRestaurant === restaurant ? 'text-primary' : 'text-gray-700 opacity-30'}
                       ${index === 0 ? 'opacity-60' : ''}
                       ${index === 2 ? 'opacity-60' : ''}`}
                   >
@@ -84,7 +84,7 @@ function App() {
             {selectedRestaurant && !isRolling && (
               <div className="p-4 bg-gray-50 text-center">
                 <p className="text-gray-600">
-                  Makan <span className="font-bold text-purple-600">{selectedRestaurant}</span> jom!
+                  Makan <span className="font-bold text-primary">{selectedRestaurant}</span> jom!
                 </p>
               </div>
             )}
@@ -95,10 +95,10 @@ function App() {
             onClick={rollRestaurants}
             disabled={isRolling}
             className={`w-full py-4 px-6 rounded-xl text-white font-semibold text-xl 
-              transition-all shadow-lg ${
+              transition-all border-2 border-primary-light ${
                 isRolling 
                   ? 'bg-gray-400 cursor-not-allowed' 
-                  : 'bg-purple-600 hover:bg-purple-700 active:transform active:scale-95'
+                  : 'bg-secondary active:transform active:scale-95'
               }`}
           >
             {isRolling ? 'Rolling...' : 'Makan mana?'}
@@ -106,7 +106,7 @@ function App() {
         </div>
       </main>
 
-      {/* <ChatButton /> */}
+      <ChatDrawer />
 
       {/* Footer */}
       <div className="w-full text-center py-10 text-gray-400 text-sm">
