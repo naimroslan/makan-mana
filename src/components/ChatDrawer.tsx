@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
-import { AiOutlineMinus } from "react-icons/ai";
+import { MdDragIndicator } from "react-icons/md";
 import { TbSend } from "react-icons/tb";
 
 interface Message {
@@ -84,7 +84,7 @@ export function ChatDrawer() {
         onClick={toggleDrawer}
       >
         <div className="flex items-center gap-2 font-medium">
-          {isOpen ? <AiOutlineMinus size={20} color="text-secondary" /> : <AiOutlineMinus  size={20} color="text-secondary" />}
+          {isOpen ? <MdDragIndicator size={20} color="text-secondary" style = {{transform: 'rotate(90deg)' }} /> : <MdDragIndicator  size={20} color="text-secondary" style = {{transform: 'rotate(90deg)' }} />}
         </div>
       </div>
       
