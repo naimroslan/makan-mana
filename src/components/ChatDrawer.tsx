@@ -74,7 +74,7 @@ export function ChatDrawer() {
   return (
     <div 
       ref={drawerRef}
-      className="fixed bottom-0 left-0 right-0 bg-white border-2 border-primary-light 
+      className="fixed bottom-0 left-0 right-0 bg-white border-x-2 border-t-2 border-primary-light 
         rounded-t-2xl z-40 overflow-hidden transition-shadow"
       style={{ height: '60px' }}
     >
