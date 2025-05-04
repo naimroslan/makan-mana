@@ -114,7 +114,7 @@ export function FilterButton({ onRestaurantsChange }: FilterButtonProps){
       <button
         onClick={() => setShowFilterModal(true)}
         className="w-full md:w-1/3 max-w-md py-2 px-4 rounded-xl text-primary font-semibold text-lg 
-          hover:bg-gray-100 active:transform active:scale-95 transition-all"
+            bg-light hover:bg-gray-100 active:transform active:scale-95 transition-all border border-primary"
       >
         Filter
       </button>
@@ -125,7 +125,7 @@ export function FilterButton({ onRestaurantsChange }: FilterButtonProps){
           onClick={() => setShowFilterModal(false)}
         >
           <div 
-            className="bg-white rounded-2xl p-6 w-full max-w-md" 
+            className="bg-white rounded-2xl p-6 w-full max-w-md border-2 border-primary-light shadow-lg" 
             onClick={(e) => e.stopPropagation()}
           >
             <div className="space-y-4">
@@ -140,8 +140,8 @@ export function FilterButton({ onRestaurantsChange }: FilterButtonProps){
                     type="checkbox"
                     checked={filters[key as keyof Filters]}
                     onChange={() => handleFilterChange(key as keyof Filters)}
-                    className="w-5 h-5 rounded border-gray-300 text-purple-600 
-                      focus:ring-purple-500"
+                    className="w-5 h-5 rounded border-gray-300 text-secondary 
+                      focus:ring-primary-light"
                   />
                   <span>{label}</span>
                 </label>
@@ -150,7 +150,7 @@ export function FilterButton({ onRestaurantsChange }: FilterButtonProps){
             <button
               onClick={() => setShowFilterModal(false)}
               className="mt-6 w-full py-2 px-4 rounded-xl text-white font-semibold text-lg 
-                bg-purple-600 hover:bg-purple-700 active:transform active:scale-95 
+                bg-secondary hover:bg-primary active:transform active:scale-95 
                 transition-all shadow-lg"
             >
               Close
