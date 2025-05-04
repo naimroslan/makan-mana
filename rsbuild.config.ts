@@ -4,6 +4,9 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+// Default API URL if environment variable is not set
+const API_URL = process.env.MAKANMANA_API_URL;
+
 export default defineConfig({
   plugins: [pluginReact()],
   source: {
@@ -11,7 +14,7 @@ export default defineConfig({
       index: './src/main.tsx'
     },
     define: {
-      'process.env.MAKANMANA_API_URL': JSON.stringify(process.env.MAKANMANA_API_URL),
+      'process.env.MAKANMANA_API_URL': JSON.stringify(API_URL),
     }
   },
   html: {

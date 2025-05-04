@@ -17,6 +17,6 @@ COPY . .
 # Build the app
 RUN pnpm run build
 
-EXPOSE 3000
+EXPOSE 3002
 
 CMD ["pnpm", "run", "start"]
