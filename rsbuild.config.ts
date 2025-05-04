@@ -18,6 +18,7 @@ export default defineConfig({
     }
   },
   html: {
-    title: 'makanmana'
+    title: 'makanmana',
+    favicon: './favicon.png'
   }
 });
