@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 
 interface Filters {
   all: boolean;
@@ -23,135 +23,112 @@ interface RestaurantData {
   [key: string]: Restaurant[];
 }
 
-export function FilterButton({ onRestaurantsChange }: FilterButtonProps){
-  const [showFilterModal, setShowFilterModal] = useState(false);
+export function FilterButton({ onRestaurantsChange }: FilterButtonProps) {
+  const [showModal, setShowModal] = useState(false);
   const [filters, setFilters] = useState<Filters>({
     all: true,
     sunwayPutra: false,
     trx: false,
-    nearby: false
+    nearby: false,
   });
-  const [restaurantData, setRestaurantData] = useState<RestaurantData | null>(null);
+  const [data, setData] = useState<RestaurantData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch restaurant data from backend
+  // fetch once
   useEffect(() => {
-    const fetchRestaurants = async () => {
+    (async () => {
       try {
-        console.log("Fetching restaurant data...");
-        const response = await fetch(`${process.env.MAKANMANA_API_URL}/restaurants`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch restaurant data');
-        }
-        const data = await response.json();
-        console.log("Restaurant data received:", data);
-        setRestaurantData(data);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching restaurant data:', error);
+        const res = await fetch(`${process.env.MAKANMANA_API_URL}/restaurants`);
+        if (!res.ok) throw new Error("Failed to load");
+        setData(await res.json());
+      } catch {
+        /* handle global error state if desired */
+      } finally {
         setLoading(false);
       }
-    };
-
-    fetchRestaurants();
+    })();
   }, []);
 
-  const getFilteredRestaurants = () => {
-    if (!restaurantData) return [];
-    
-    let filteredRestaurants: { name: string }[] = [];
-
+  // compute filtered list
+  const filtered = useMemo(() => {
+    if (!data) return [];
+    let list: Restaurant[] = [];
     if (filters.all) {
-      Object.values(restaurantData).forEach((mallRestaurants) => {
-        filteredRestaurants = filteredRestaurants.concat(mallRestaurants);
-      });
+      list = Object.values(data).flat();
     } else {
-      if (filters.sunwayPutra) {
-        filteredRestaurants = filteredRestaurants.concat(restaurantData.sunwayputra);
-      }
-      if (filters.trx) {
-        filteredRestaurants = filteredRestaurants.concat(restaurantData.trx);
-      }
-      if (filters.nearby) {
-        filteredRestaurants = filteredRestaurants.concat(restaurantData.nearby);
-      }
+      if (filters.sunwayPutra) list.push(...data.sunwayputra);
+      if (filters.trx) list.push(...data.trx);
+      if (filters.nearby) list.push(...data.nearby);
     }
+    return list.map((r) => r.name);
+  }, [data, filters]);
 
-    return filteredRestaurants.map((restaurant) => restaurant.name);
-  };
+  // notify parent
+  useEffect(() => {
+    onRestaurantsChange(filtered);
+  }, [filtered, onRestaurantsChange]);
 
-  const handleFilterChange = (filterKey: keyof Filters) => {
-    setFilters(prevFilters => {
-      const newFilters = { ...prevFilters };
-      if (filterKey === 'all') {
-        newFilters.all = !newFilters.all;
-        if (newFilters.all) {
-          newFilters.sunwayPutra = false;
-          newFilters.trx = false;
-          newFilters.nearby = false;
+  const toggleFilter = useCallback((key: keyof Filters) => {
+    setFilters((prev) => {
+      const next = { ...prev };
+      if (key === "all") {
+        next.all = !prev.all;
+        if (next.all) {
+          next.sunwayPutra = next.trx = next.nearby = false;
         }
       } else {
-        newFilters[filterKey] = !newFilters[filterKey];
-        if (newFilters.sunwayPutra && newFilters.trx && newFilters.nearby) {
-          newFilters.all = true;
-        } else {
-          newFilters.all = false;
-        }
+        next[key] = !prev[key];
+        next.all = next.sunwayPutra && next.trx && next.nearby;
       }
-      return newFilters;
+      return next;
     });
-  };
-
-  // Update parent component whenever filters change
-  useEffect(() => {
-    const restaurants = getFilteredRestaurants();
-    console.log("Filtered restaurants:", restaurants);
-    onRestaurantsChange(restaurants);
-  }, [filters, restaurantData]); // Add restaurantData as a dependency
+  }, []);
 
   return (
     <>
       <button
-        onClick={() => setShowFilterModal(true)}
-        className="w-full md:w-1/3 max-w-md py-2 px-4 rounded-xl text-primary font-semibold text-lg 
-            bg-light hover:bg-gray-100 active:transform active:scale-95 transition-all border border-primary"
+        onClick={() => setShowModal(true)}
+        className="w-full md:w-1/3 max-w-md py-2 px-4 rounded-xl text-primary font-semibold text-lg bg-light hover:bg-gray-100 transition-all border border-primary"
       >
         Filter
       </button>
 
-      {showFilterModal && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" 
-          onClick={() => setShowFilterModal(false)}
+      {showModal && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+          onClick={() => setShowModal(false)}
         >
-          <div 
-            className="bg-white rounded-2xl p-6 w-full max-w-md border-2 border-primary-light shadow-lg" 
+          <div
+            className="bg-white rounded-2xl p-6 w-full max-w-md border-2 border-primary-light shadow-lg"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="space-y-4">
-              {[
-                { key: 'all', label: 'All' },
-                { key: 'sunwayPutra', label: 'Sunway Putra' },
-                { key: 'trx', label: 'TRX' },
-                { key: 'nearby', label: 'Nearby' }
-              ].map(({ key, label }) => (
-                <label key={key} className="flex items-center space-x-3 text-gray-700">
+              {(["all", "sunwayPutra", "trx", "nearby"] as const).map((key) => (
+                <label
+                  key={key}
+                  className="flex items-center space-x-3 text-gray-700"
+                >
                   <input
                     type="checkbox"
-                    checked={filters[key as keyof Filters]}
-                    onChange={() => handleFilterChange(key as keyof Filters)}
-                    className="w-5 h-5 rounded border-gray-300 text-secondary 
-                      focus:ring-primary-light"
+                    checked={filters[key]}
+                    onChange={() => toggleFilter(key)}
+                    className="w-5 h-5 rounded border-gray-300 text-secondary focus:ring-primary-light"
                   />
-                  <span>{label}</span>
+                  <span>
+                    {key === "all"
+                      ? "All"
+                      : key === "sunwayPutra"
+                        ? "Sunway Putra"
+                        : key === "trx"
+                          ? "TRX"
+                          : "Nearby"}
+                  </span>
                 </label>
               ))}
             </div>
             <button
-              onClick={() => setShowFilterModal(false)}
-              className="mt-6 w-full py-2 px-4 rounded-xl text-white font-semibold text-lg 
-                bg-secondary hover:bg-primary active:transform active:scale-95 
-                transition-all shadow-lg"
+              onClick={() => setShowModal(false)}
+              className="mt-6 w-full py-2 px-4 rounded-xl text-white font-semibold text-lg bg-secondary hover:bg-primary transition-all shadow-lg"
             >
               Close
             </button>
