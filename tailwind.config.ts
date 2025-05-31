@@ -25,6 +25,10 @@ export default {
         xl: "1rem",
         "2xl": "1.5rem",
       },
+      backdropBlur: {
+        sm: "4px",
+        md: "8px",
+      },
     },
   },
   plugins: [],

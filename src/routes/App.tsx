@@ -1,20 +1,42 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { RiFilter3Fill, RiSearchFill } from "react-icons/ri";
 import { gsap } from "gsap";
-import { FilterButton } from "./components/FilterButton";
-import { ChatDrawer } from "./components/ChatDrawer";
+
+import Navbar from "../components/Menu/Navbar";
+import FilterModal from "../components/Modal/FilterModal"; // Adjust path as needed
 
 const ROLL_DURATION = 3;
 const VISIBLE_ITEM_HEIGHT = 60;
 
 function App() {
+  const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
   const [isRolling, setIsRolling] = useState(false);
   const [selectedRestaurant, setSelectedRestaurant] = useState<string | null>(
     null,
   );
   const [restaurants, setRestaurants] = useState<string[]>([]);
+  const [search, setSearch] = useState("");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  // reset position on mount or when restaurant list changes
+  // List of locations for filter modal select
+  const locations = ["Sunway Putra Mall", "TRX Mall", "Nearby"];
+
+  useEffect(() => {
+    const fetchRestaurants = async () => {
+      try {
+        const res = await fetch(`${process.env.MAKANMANA_API_URL}/restaurants`);
+        const json = await res.json();
+        setRestaurants(json.data || []);
+      } catch (err) {
+        console.error("Failed to load restaurants:", err);
+      }
+    };
+
+    fetchRestaurants();
+  }, []);
+
   useEffect(() => {
     if (!containerRef.current) return;
     gsap.set(containerRef.current, { y: 0 });
@@ -26,7 +48,6 @@ function App() {
     setIsRolling(true);
     setSelectedRestaurant(null);
 
-    // compute heights
     const itemHeight = VISIBLE_ITEM_HEIGHT;
     const totalHeight = itemHeight * restaurants.length;
 
@@ -44,17 +65,88 @@ function App() {
     });
   }, [isRolling, restaurants]);
 
+  const onSearch = () => {
+    const trimmed = search.trim();
+    if (!trimmed) return;
+    navigate("/chat", { state: { query: trimmed } });
+  };
+
+  // Open and close filter modal
+  const openFilterModal = () => setIsFilterOpen(true);
+  const closeFilterModal = () => setIsFilterOpen(false);
+
+  // Apply filter by location
+  const handleApplyFilter = (selectedLocation: string) => {
+    // Call filter API
+    fetch(`${process.env.MAKANMANA_API_URL}/filter`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ location: selectedLocation.toLowerCase() }),
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.data) {
+          setRestaurants(json.data);
+          setSelectedRestaurant(null);
+        } else {
+          alert(json.message || "No restaurants found.");
+          setRestaurants([]);
+          setSelectedRestaurant(null);
+        }
+      })
+      .catch((err) => {
+        console.error("Filter fetch error:", err);
+        alert("Failed to filter restaurants.");
+      });
+
+    closeFilterModal();
+  };
+
   return (
-    <div className="min-h-screen bg-[#f8f9fa] flex flex-col">
-      <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 relative">
-        <div className="w-full max-w-md space-y-8">
-          <FilterButton onRestaurantsChange={setRestaurants} />
+    <div className="min-h-screen bg-light flex flex-col">
+      <main className="flex-1 flex items-center justify-center px-4">
+        <div className="w-full max-w-md">
+          {/* Search Label */}
+          <h2 className="text-primary text-xl font-semibold mb-2">
+            Ask Me Anything
+          </h2>
+          <div className="flex items-center bg-primary-light rounded-full p-2">
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="flex-1 bg-transparent focus:outline-none text-primary px-2"
+              placeholder="What you feel like eating?"
+            />
+            <button
+              onClick={onSearch}
+              disabled={!search.trim()}
+              className="bg-light px-5 py-3 rounded-full text-primary text-xl font-bold"
+            >
+              <RiSearchFill />
+            </button>
+          </div>
 
-          <div className="bg-light rounded-2xl overflow-hidden border-2 border-primary-light">
-            <div className="relative h-[180px] overflow-hidden bg-white">
-              <div className="absolute inset-x-0 top-0 h-[60px] bg-gradient-to-b from-white to-transparent z-10" />
-              <div className="absolute inset-x-0 bottom-0 h-[60px] bg-gradient-to-t from-white to-transparent z-10" />
+          {/* Today's Pick heading + filter */}
+          <div className="mt-8 flex items-center justify-between">
+            <h2 className="text-primary text-xl font-semibold">Today's Pick</h2>
+            <button
+              onClick={openFilterModal}
+              aria-label="Open filter modal"
+              className="p-1"
+            >
+              <RiFilter3Fill className="w-6 h-6 text-primary" />
+            </button>
+          </div>
 
+          {/* Rolling UI */}
+          <div className="mt-4 bg-white rounded-2xl overflow-hidden border border-border">
+            <div className="relative h-[180px] overflow-hidden">
+              {/* Gradient overlays */}
+              <div className="absolute inset-x-0 top-0 h-[60px] bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
+              <div className="absolute inset-x-0 bottom-0 h-[60px] bg-gradient-to-t from-white to-transparent z-10 pointer-events-none" />
+
+              {/* Restaurants container */}
               <div
                 ref={containerRef}
                 className="absolute top-[60px] inset-x-0 transition-all"
@@ -67,7 +159,7 @@ function App() {
                       className={`h-[60px] flex items-center justify-center text-xl font-semibold transition-opacity ${
                         isSelected
                           ? "text-primary opacity-100"
-                          : "text-gray-700 opacity-30"
+                          : "text-gray opacity-30"
                       }`}
                     >
                       {name}
@@ -78,8 +170,8 @@ function App() {
             </div>
 
             {selectedRestaurant && !isRolling && (
-              <div className="p-4 bg-gray-50 text-center">
-                <p className="text-gray-600">
+              <div className="p-4 bg-light text-center">
+                <p className="text-gray">
                   Makan{" "}
                   <span className="font-bold text-primary">
                     {selectedRestaurant}
@@ -93,23 +185,29 @@ function App() {
           <button
             onClick={rollRestaurants}
             disabled={isRolling || restaurants.length === 0}
-            className={`w-full py-4 px-6 rounded-xl text-white font-semibold text-xl transition-all
-              ${
-                isRolling || restaurants.length === 0
-                  ? "bg-gray-400 border-gray-400 cursor-not-allowed"
-                  : "bg-secondary border-primary-light active:scale-95"
-              }`}
+            className={`mt-4 w-full py-4 px-6 rounded-xl text-white font-semibold text-xl transition-all ${
+              isRolling || restaurants.length === 0
+                ? "bg-muted cursor-not-allowed"
+                : "bg-primary active:scale-95"
+            }`}
           >
-            {isRolling ? "Rolling..." : "Makan mana?"}
+            {isRolling
+              ? "Rolling..."
+              : restaurants.length === 0
+                ? "Loading..."
+                : "Makan mana?"}
           </button>
         </div>
       </main>
+      <Navbar />
 
-      <ChatDrawer />
-
-      <footer className="w-full text-center py-10 text-gray-400 text-sm">
-        yetanotherproject
-      </footer>
+      {/* Filter modal */}
+      <FilterModal
+        isOpen={isFilterOpen}
+        onClose={closeFilterModal}
+        onApply={handleApplyFilter}
+        locations={locations}
+      />
     </div>
   );
 }
