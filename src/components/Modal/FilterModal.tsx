@@ -1,141 +1,162 @@
-import { useState, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 
 interface FilterModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onApply: (selectedFilters: {
+  onApply: (filters: {
     place: string[];
-    people: string[];
     type: string[];
+    origin: string[];
   }) => void;
-  filters?: {
-    place?: string[];
-    people?: string[];
-    type?: string[];
+  filterOptions: {
+    place: string[];
+    type: string[];
+    origin: string[];
   };
 }
 
-export default function FilterModal({
+function formatLabel(text: string) {
+  return text
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+function FilterModal({
   isOpen,
   onClose,
   onApply,
-  filters = {},
+  filterOptions,
 }: FilterModalProps) {
-  const [selected, setSelected] = useState<{
-    place: string[];
-    people: string[];
-    type: string[];
-  }>({
-    place: [],
-    people: [],
-    type: [],
+  const [selected, setSelected] = useState({
+    place: [] as string[],
+    type: [] as string[],
+    origin: [] as string[],
   });
 
-  // Reset on modal open
-  useEffect(() => {
-    if (isOpen) {
-      setSelected({ place: [], people: [], type: [] });
-    }
-  }, [isOpen]);
+  const modalRef = useRef<HTMLDivElement>(null);
 
-  if (!isOpen) return null;
-
-  const toggleItem = (category: keyof typeof selected, item: string) => {
+  const toggle = (key: "place" | "type" | "origin", value: string) => {
     setSelected((prev) => {
-      const list = prev[category];
-      const isSelected = list.includes(item);
-      return {
-        ...prev,
-        [category]: isSelected
-          ? list.filter((i) => i !== item)
-          : [...list, item],
-      };
+      const current = new Set(prev[key]);
+      if (current.has(value)) {
+        current.delete(value);
+      } else {
+        current.add(value);
+      }
+      return { ...prev, [key]: Array.from(current) };
     });
   };
 
   const handleApply = () => {
     onApply(selected);
-    onClose();
   };
 
-  const renderChips = (
-    items: string[] = [],
-    category: keyof typeof selected,
-  ) => (
-    <div className="flex flex-wrap gap-2">
-      {items.map((item) => {
-        const isChecked = selected[category].includes(item);
-        return (
-          <button
-            key={item}
-            onClick={() => toggleItem(category, item)}
-            className={`px-4 py-2 rounded-full border text-sm font-medium transition
-              ${
-                isChecked
-                  ? "bg-primary text-white border-primary"
-                  : "bg-light text-gray border-border hover:bg-primary-light"
-              }`}
-          >
-            {item}
-          </button>
-        );
-      })}
-    </div>
-  );
+  // Close on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        modalRef.current &&
+        !modalRef.current.contains(event.target as Node)
+      ) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
 
   return (
-    <div
-      className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-[1000]"
-      onClick={onClose}
-    >
+    <div className="fixed inset-0 z-50 bg-black/40 flex justify-center items-center p-4">
       <div
-        className="bg-white rounded-2xl p-6 w-full max-w-md mx-auto shadow-lg"
-        onClick={(e) => e.stopPropagation()}
+        ref={modalRef}
+        className="bg-white rounded-xl p-4 w-full max-w-md max-h-[90vh] overflow-auto"
       >
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-xl font-bold text-gray"
-          aria-label="Close modal"
-        >
-          ×
-        </button>
-
-        {/* Category: Place */}
-        {filters.place && filters.place.length > 0 && (
-          <div className="mb-5">
-            <h3 className="text-gray font-semibold mb-2">Place</h3>
-            {renderChips(filters.place, "place")}
+        {/* Place */}
+        <div className="mb-4">
+          <h3 className="text-sm font-medium text-gray mb-2">Place</h3>
+          <div className="flex flex-wrap gap-2">
+            {filterOptions.place.map((p) => (
+              <button
+                key={p}
+                onClick={() => toggle("place", p)}
+                className={`px-3 py-1 rounded-full text-sm border ${
+                  selected.place.includes(p)
+                    ? "bg-primary text-white border-primary"
+                    : "bg-light text-primary border-primary-light"
+                }`}
+              >
+                {formatLabel(p)}
+              </button>
+            ))}
           </div>
-        )}
+        </div>
 
-        {/* Category: People */}
-        {filters.people && filters.people.length > 0 && (
-          <div className="mb-5">
-            <h3 className="text-gray font-semibold mb-2">People</h3>
-            {renderChips(filters.people, "people")}
+        {/* Type */}
+        <div className="mb-4">
+          <h3 className="text-sm font-medium text-gray mb-2">Type</h3>
+          <div className="flex flex-wrap gap-2">
+            {filterOptions.type.map((t) => (
+              <button
+                key={t}
+                onClick={() => toggle("type", t)}
+                className={`px-3 py-1 rounded-full text-sm border ${
+                  selected.type.includes(t)
+                    ? "bg-primary text-white border-primary"
+                    : "bg-light text-primary border-primary-light"
+                }`}
+              >
+                {formatLabel(t)}
+              </button>
+            ))}
           </div>
-        )}
+        </div>
 
-        {/* Category: Type */}
-        {filters.type && filters.type.length > 0 && (
-          <div className="mb-5">
-            <h3 className="text-gray font-semibold mb-2">Type</h3>
-            {renderChips(filters.type, "type")}
+        {/* Origin */}
+        <div className="mb-4">
+          <h3 className="text-sm font-medium text-gray mb-2">Origin</h3>
+          <div className="flex flex-wrap gap-2">
+            {filterOptions.origin.map((o) => (
+              <button
+                key={o}
+                onClick={() => toggle("origin", o)}
+                className={`px-3 py-1 rounded-full text-sm border ${
+                  selected.origin.includes(o)
+                    ? "bg-primary text-white border-primary"
+                    : "bg-light text-primary border-primary-light"
+                }`}
+              >
+                {formatLabel(o)}
+              </button>
+            ))}
           </div>
-        )}
+        </div>
 
-        <button
-          onClick={handleApply}
-          className="w-full py-3 rounded-xl bg-primary text-white font-semibold mt-4 disabled:bg-muted"
-          disabled={
-            selected.place.length === 0 &&
-            selected.people.length === 0 &&
-            selected.type.length === 0
-          }
-        >
-          Apply Filter
-        </button>
+        <div className="flex justify-center items-center gap-4 mt-6">
+          <button
+            onClick={onClose}
+            className="w-1/2 py-2 rounded-full text-primary font-medium"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleApply}
+            className="w-1/2 py-2 rounded-full bg-primary text-white font-medium"
+          >
+            Apply
+          </button>
+        </div>
       </div>
     </div>
   );
 }
+
+export default FilterModal;

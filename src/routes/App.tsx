@@ -4,10 +4,26 @@ import { RiFilter3Fill, RiSearchFill } from "react-icons/ri";
 import { gsap } from "gsap";
 
 import Navbar from "../components/Menu/Navbar";
-import FilterModal from "../components/Modal/FilterModal"; // Adjust path as needed
+import FilterModal from "../components/Modal/FilterModal";
 
 const ROLL_DURATION = 3;
 const VISIBLE_ITEM_HEIGHT = 60;
+
+interface Restaurant {
+  name: string;
+  type: string[];
+  origin?: string[];
+}
+
+interface RestaurantData {
+  [location: string]: Restaurant[];
+}
+
+interface FilterOptions {
+  place: string[];
+  type: string[];
+  origin: string[];
+}
 
 function App() {
   const navigate = useNavigate();
@@ -17,18 +33,56 @@ function App() {
     null,
   );
   const [restaurants, setRestaurants] = useState<string[]>([]);
+  const [restaurantData, setRestaurantData] = useState<RestaurantData>({});
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
+    place: [],
+    type: [],
+    origin: [],
+  });
   const [search, setSearch] = useState("");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  // List of locations for filter modal select
-  const locations = ["Sunway Putra Mall", "TRX Mall", "Nearby"];
+  const extractFilterOptions = (data: RestaurantData): FilterOptions => {
+    const places = Object.keys(data);
+    const typeSet = new Set<string>();
+    const originSet = new Set<string>();
+
+    Object.values(data).forEach((restaurants) => {
+      restaurants.forEach((restaurant) => {
+        restaurant.type?.forEach((c) => typeSet.add(c));
+        restaurant.origin?.forEach((o) => originSet.add(o));
+      });
+    });
+
+    return {
+      place: places,
+      type: Array.from(typeSet),
+      origin: Array.from(originSet),
+    };
+  };
+
+  const getAllRestaurantNames = (data: RestaurantData): string[] => {
+    return Object.values(data)
+      .flat()
+      .map((r) => r.name);
+  };
 
   useEffect(() => {
     const fetchRestaurants = async () => {
       try {
         const res = await fetch(`${process.env.MAKANMANA_API_URL}/restaurants`);
         const json = await res.json();
-        setRestaurants(json.data || []);
+
+        // Debug log for fetched data
+        console.log("Fetched restaurants data:", json);
+
+        if (json.data && Array.isArray(json.data)) {
+          setRestaurants(json.data);
+        } else {
+          setRestaurantData(json);
+          setRestaurants(getAllRestaurantNames(json));
+          setFilterOptions(extractFilterOptions(json));
+        }
       } catch (err) {
         console.error("Failed to load restaurants:", err);
       }
@@ -71,42 +125,42 @@ function App() {
     navigate("/chat", { state: { query: trimmed } });
   };
 
-  // Open and close filter modal
-  const openFilterModal = () => setIsFilterOpen(true);
-  const closeFilterModal = () => setIsFilterOpen(false);
+  const handleApplyFilter = (selectedFilters: FilterOptions) => {
+    // Debug log for filters applied
+    console.log("Filters applied from Modal:", selectedFilters);
 
-  // Apply filter by location
-  const handleApplyFilter = (selectedLocation: string) => {
-    // Call filter API
-    fetch(`${process.env.MAKANMANA_API_URL}/filter`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ location: selectedLocation.toLowerCase() }),
-    })
+    const params = new URLSearchParams();
+
+    selectedFilters.place.forEach((p) => params.append("place", p));
+    selectedFilters.type.forEach((t) => params.append("type", t));
+    selectedFilters.origin.forEach((o) => params.append("origin", o));
+
+    fetch(`${process.env.MAKANMANA_API_URL}/filter?${params.toString()}`)
       .then((res) => res.json())
-      .then((json) => {
-        if (json.data) {
-          setRestaurants(json.data);
-          setSelectedRestaurant(null);
-        } else {
-          alert(json.message || "No restaurants found.");
-          setRestaurants([]);
-          setSelectedRestaurant(null);
-        }
+      .then((data) => {
+        const names = Object.values(data)
+          .flat()
+          .map((r: any) => r.name);
+        setRestaurants(names);
+        setSelectedRestaurant(null);
       })
       .catch((err) => {
         console.error("Filter fetch error:", err);
         alert("Failed to filter restaurants.");
       });
 
-    closeFilterModal();
+    setIsFilterOpen(false);
+  };
+
+  const resetFilters = () => {
+    setRestaurants(getAllRestaurantNames(restaurantData));
+    setSelectedRestaurant(null);
   };
 
   return (
     <div className="min-h-screen bg-light flex flex-col">
       <main className="flex-1 flex items-center justify-center px-4">
         <div className="w-full max-w-md">
-          {/* Search Label */}
           <h2 className="text-primary text-xl font-semibold mb-2">
             Ask Me Anything
           </h2>
@@ -127,26 +181,25 @@ function App() {
             </button>
           </div>
 
-          {/* Today's Pick heading + filter */}
           <div className="mt-8 flex items-center justify-between">
             <h2 className="text-primary text-xl font-semibold">Today's Pick</h2>
-            <button
-              onClick={openFilterModal}
-              aria-label="Open filter modal"
-              className="p-1"
-            >
-              <RiFilter3Fill className="w-6 h-6 text-primary" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={resetFilters}
+                className="text-sm text-primary underline"
+              >
+                Reset
+              </button>
+              <button onClick={() => setIsFilterOpen(true)} className="p-1">
+                <RiFilter3Fill className="w-6 h-6 text-primary" />
+              </button>
+            </div>
           </div>
 
-          {/* Rolling UI */}
           <div className="mt-4 bg-white rounded-2xl overflow-hidden border border-border">
             <div className="relative h-[180px] overflow-hidden">
-              {/* Gradient overlays */}
               <div className="absolute inset-x-0 top-0 h-[60px] bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
               <div className="absolute inset-x-0 bottom-0 h-[60px] bg-gradient-to-t from-white to-transparent z-10 pointer-events-none" />
-
-              {/* Restaurants container */}
               <div
                 ref={containerRef}
                 className="absolute top-[60px] inset-x-0 transition-all"
@@ -201,12 +254,11 @@ function App() {
       </main>
       <Navbar />
 
-      {/* Filter modal */}
       <FilterModal
         isOpen={isFilterOpen}
-        onClose={closeFilterModal}
+        onClose={() => setIsFilterOpen(false)}
         onApply={handleApplyFilter}
-        locations={locations}
+        filterOptions={filterOptions}
       />
     </div>
   );
