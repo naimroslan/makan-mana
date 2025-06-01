@@ -13,7 +13,7 @@ interface FilterModalProps {
     type: string[];
     origin: string[];
   };
-  isLoading?: boolean; // Add loading state prop
+  isLoading?: boolean;
 }
 
 function formatLabel(text: string) {
@@ -99,9 +99,7 @@ function FilterModal({
         className="bg-white rounded-xl p-4 w-full max-w-md max-h-[90vh] overflow-auto"
       >
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-primary">
-            Filter Restaurants
-          </h2>
+          <h2 className="text-lg font-semibold text-primary">Filter</h2>
           <button
             onClick={onClose}
             className="text-gray hover:text-primary text-xl"

@@ -1,3 +1,17 @@
+@font-face {
+    font-family: "Funnel Display";
+    src: url("./assets/fonts/FunnelDisplay.ttf") format("truetype");
+    font-weight: 100 700;
+    font-style: normal;
+    font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    body {
+        @apply font-funnel;
+    }
+}
