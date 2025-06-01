@@ -33,6 +33,7 @@ function App() {
     null,
   );
   const [restaurants, setRestaurants] = useState<string[]>([]);
+  const [originalRestaurants, setOriginalRestaurants] = useState<string[]>([]); // Store original list
   const [restaurantData, setRestaurantData] = useState<RestaurantData>({});
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     place: [],
@@ -41,6 +42,8 @@ function App() {
   });
   const [search, setSearch] = useState("");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isFilterLoading, setIsFilterLoading] = useState(false);
+  const [hasActiveFilters, setHasActiveFilters] = useState(false);
 
   const extractFilterOptions = (data: RestaurantData): FilterOptions => {
     const places = Object.keys(data);
@@ -73,14 +76,14 @@ function App() {
         const res = await fetch(`${process.env.MAKANMANA_API_URL}/restaurants`);
         const json = await res.json();
 
-        // Debug log for fetched data
-        console.log("Fetched restaurants data:", json);
-
         if (json.data && Array.isArray(json.data)) {
           setRestaurants(json.data);
+          setOriginalRestaurants(json.data);
         } else {
+          const restaurantNames = getAllRestaurantNames(json);
           setRestaurantData(json);
-          setRestaurants(getAllRestaurantNames(json));
+          setRestaurants(restaurantNames);
+          setOriginalRestaurants(restaurantNames);
           setFilterOptions(extractFilterOptions(json));
         }
       } catch (err) {
@@ -125,78 +128,119 @@ function App() {
     navigate("/chat", { state: { query: trimmed } });
   };
 
-  const handleApplyFilter = (selectedFilters: FilterOptions) => {
-    // Debug log for filters applied
-    console.log("Filters applied from Modal:", selectedFilters);
+  const handleApplyFilter = async (selectedFilters: FilterOptions) => {
+    setIsFilterLoading(true);
 
-    const params = new URLSearchParams();
+    try {
+      const params = new URLSearchParams();
 
-    selectedFilters.place.forEach((p) => params.append("place", p));
-    selectedFilters.type.forEach((t) => params.append("type", t));
-    selectedFilters.origin.forEach((o) => params.append("origin", o));
+      selectedFilters.place.forEach((p) => params.append("place", p));
+      selectedFilters.type.forEach((t) => params.append("type", t));
+      selectedFilters.origin.forEach((o) => params.append("origin", o));
 
-    fetch(`${process.env.MAKANMANA_API_URL}/filter?${params.toString()}`)
-      .then((res) => res.json())
-      .then((data) => {
-        const names = Object.values(data)
+      const res = await fetch(
+        `${process.env.MAKANMANA_API_URL}/filter?${params.toString()}`,
+      );
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
+      const data = await res.json();
+
+      // Handle different response formats
+      let filteredNames: string[];
+      if (Array.isArray(data)) {
+        filteredNames = data;
+      } else {
+        filteredNames = Object.values(data)
           .flat()
           .map((r: any) => r.name);
-        setRestaurants(names);
-        setSelectedRestaurant(null);
-      })
-      .catch((err) => {
-        console.error("Filter fetch error:", err);
-        alert("Failed to filter restaurants.");
-      });
+      }
 
-    setIsFilterOpen(false);
+      setRestaurants(filteredNames);
+      setSelectedRestaurant(null);
+      setHasActiveFilters(true);
+
+      // Reset GSAP position
+      if (containerRef.current) {
+        gsap.set(containerRef.current, { y: 0 });
+      }
+    } catch (err) {
+      console.error("Filter fetch error:", err);
+      alert("Failed to filter restaurants. Please try again.");
+    } finally {
+      setIsFilterLoading(false);
+      setIsFilterOpen(false);
+    }
   };
 
   const resetFilters = () => {
-    setRestaurants(getAllRestaurantNames(restaurantData));
+    setRestaurants(originalRestaurants);
     setSelectedRestaurant(null);
+    setHasActiveFilters(false);
+
+    // Reset GSAP position
+    if (containerRef.current) {
+      gsap.set(containerRef.current, { y: 0 });
+    }
   };
 
   return (
     <div className="min-h-screen bg-light flex flex-col">
-      <main className="flex-1 flex items-center justify-center px-4">
-        <div className="w-full max-w-md">
-          <h2 className="text-primary text-xl font-semibold mb-2">
-            Ask Me Anything
-          </h2>
-          <div className="flex items-center bg-primary-light rounded-full p-2">
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="flex-1 bg-transparent focus:outline-none text-primary px-2"
-              placeholder="What you feel like eating?"
-            />
-            <button
-              onClick={onSearch}
-              disabled={!search.trim()}
-              className="bg-light px-5 py-3 rounded-full text-primary text-xl font-bold"
-            >
-              <RiSearchFill />
-            </button>
-          </div>
-
-          <div className="mt-8 flex items-center justify-between">
-            <h2 className="text-primary text-xl font-semibold">Today's Pick</h2>
-            <div className="flex items-center gap-2">
+      <main className="flex-1 px-4 pt-6 pb-24 overflow-auto">
+        <div className="w-full max-w-md mx-auto space-y-6">
+          <div>
+            <h2 className="text-primary text-xl font-semibold mb-2">
+              Ask Me Anything
+            </h2>
+            <div className="flex items-center bg-primary-light rounded-full p-2">
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && onSearch()}
+                className="flex-1 bg-transparent focus:outline-none text-primary px-2"
+                placeholder="What you feel like eating?"
+              />
               <button
-                onClick={resetFilters}
-                className="text-sm text-primary underline"
+                onClick={onSearch}
+                disabled={!search.trim()}
+                className="bg-light px-5 py-3 rounded-full text-primary text-xl font-bold disabled:opacity-50"
               >
-                Reset
-              </button>
-              <button onClick={() => setIsFilterOpen(true)} className="p-1">
-                <RiFilter3Fill className="w-6 h-6 text-primary" />
+                <RiSearchFill />
               </button>
             </div>
           </div>
 
-          <div className="mt-4 bg-white rounded-2xl overflow-hidden border border-border">
+          <div className="flex items-center justify-between">
+            <h2 className="text-primary text-xl font-semibold">
+              Today's Pick
+              {hasActiveFilters && (
+                <span className="text-sm font-normal text-gray ml-2">
+                  ({restaurants.length} filtered)
+                </span>
+              )}
+            </h2>
+            <div className="flex items-center gap-2">
+              {hasActiveFilters && (
+                <button
+                  onClick={resetFilters}
+                  className="text-sm text-primary underline hover:text-primary/80"
+                >
+                  Reset
+                </button>
+              )}
+              <button
+                onClick={() => setIsFilterOpen(true)}
+                className={`p-1 transition-colors ${hasActiveFilters ? "text-primary" : "text-gray"}`}
+              >
+                <RiFilter3Fill className="w-6 h-6" />
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl overflow-hidden border border-border">
             <div className="relative h-[180px] overflow-hidden">
               <div className="absolute inset-x-0 top-0 h-[60px] bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
               <div className="absolute inset-x-0 bottom-0 h-[60px] bg-gradient-to-t from-white to-transparent z-10 pointer-events-none" />
@@ -219,6 +263,14 @@ function App() {
                     </div>
                   );
                 })}
+
+                {restaurants.length === 0 && (
+                  <div className="h-[60px] flex items-center justify-center text-gray text-lg">
+                    {hasActiveFilters
+                      ? "No restaurants match your filters"
+                      : "Loading restaurants..."}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -238,27 +290,32 @@ function App() {
           <button
             onClick={rollRestaurants}
             disabled={isRolling || restaurants.length === 0}
-            className={`mt-4 w-full py-4 px-6 rounded-xl text-white font-semibold text-xl transition-all ${
+            className={`w-full py-4 px-6 rounded-xl text-white font-semibold text-xl transition-all ${
               isRolling || restaurants.length === 0
                 ? "bg-muted cursor-not-allowed"
-                : "bg-primary active:scale-95"
+                : "bg-primary active:scale-95 hover:bg-primary/90"
             }`}
           >
             {isRolling
               ? "Rolling..."
               : restaurants.length === 0
-                ? "Loading..."
+                ? hasActiveFilters
+                  ? "No restaurants available"
+                  : "Loading..."
                 : "Makan mana?"}
           </button>
         </div>
       </main>
-      <Navbar />
+
+      {/* Navbar fixed to bottom */}
+      <Navbar className="fixed bottom-0 left-0 right-0 z-50" />
 
       <FilterModal
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
         onApply={handleApplyFilter}
         filterOptions={filterOptions}
+        isLoading={isFilterLoading}
       />
     </div>
   );

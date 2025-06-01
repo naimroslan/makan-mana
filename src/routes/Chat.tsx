@@ -16,10 +16,8 @@ function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState(initialQuery);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
   const purpleBlobRef = useRef<HTMLDivElement>(null);
   const blueBlobRef = useRef<HTMLDivElement>(null);
-
   const hasSentInitial = useRef(false);
 
   // Animate blobs
@@ -53,12 +51,17 @@ function Chat() {
     animateBlob(blueBlobRef, 60, 14, true);
   }, []);
 
-  // Scroll to bottom when messages update
+  // Scroll to bottom on message update - contained within messages area
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current) {
+      const messagesContainer = messagesEndRef.current.parentElement;
+      if (messagesContainer) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+    }
   }, [messages]);
 
-  // Initial message setup
+  // Initial welcome and optional query
   useEffect(() => {
     const welcome: Message[] = [
       { text: "What do you feel like eating?", isUser: false },
@@ -91,6 +94,7 @@ function Chat() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: trimmed }),
       });
+
       const json = await res.json();
 
       setMessages((prev) => [
@@ -118,8 +122,8 @@ function Chat() {
   };
 
   return (
-    <div className="relative flex flex-col h-screen overflow-hidden bg-white">
-      {/* Animated blobs */}
+    <div className="min-h-screen bg-light flex flex-col relative overflow-hidden">
+      {/* Animated blobs - moved to background */}
       <div className="fixed inset-0 z-0 flex items-center justify-center pointer-events-none">
         <div
           ref={purpleBlobRef}
@@ -131,54 +135,65 @@ function Chat() {
         />
       </div>
 
-      {/* Glass overlay */}
-      <div className="absolute inset-0 bg-white/40 backdrop-blur-2xl z-0" />
+      {/* Glass overlay - lighter for better readability */}
+      <div className="absolute inset-0 bg-white/20 backdrop-blur-xl z-0" />
 
-      {/* Main content */}
-      <div className="relative z-10 flex flex-col h-full">
-        {/* Header */}
-        <div className="relative flex items-center justify-center px-4 py-6">
-          <button
-            onClick={() => navigate("/")}
-            className="absolute left-4 bg-white shadow-md rounded-full p-4"
-          >
-            <RiArrowLeftLine size={30} className="text-primary" />
-          </button>
-          <h1 className="text-3xl font-bold text-primary">Chat</h1>
-        </div>
-
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 pt-4 pb-2 space-y-3">
-          {messages.map((msg, index) => (
-            <div
-              key={index}
-              className={`max-w-[80%] p-3 text-[15px] leading-snug rounded-2xl ${
-                msg.isUser
-                  ? "bg-primary-light text-primary ml-auto rounded-br-md"
-                  : "bg-primary text-white rounded-bl-md"
-              }`}
+      {/* Header - following App.tsx pattern */}
+      <header className="relative z-10 px-4 py-6 bg-transparent">
+        <div className="w-full max-w-md mx-auto">
+          <div className="relative flex items-center justify-center">
+            <button
+              onClick={() => navigate("/")}
+              className="absolute left-0 p-2 -m-2"
             >
-              {msg.text}
-            </div>
-          ))}
-          <div ref={messagesEndRef} />
+              <RiArrowLeftLine size={24} className="text-primary" />
+            </button>
+            <h1 className="text-2xl font-semibold text-primary">Chat</h1>
+          </div>
         </div>
+      </header>
 
-        {/* Input field */}
-        <div className="px-4 py-3">
-          <div className="flex items-center bg-primary-light rounded-full p-2">
+      {/* Messages - contained scrolling area */}
+      <main className="flex-1 relative z-10 px-4 pb-24">
+        <div className="w-full max-w-md mx-auto h-full">
+          <div className="h-full overflow-y-auto space-y-3 pr-2">
+            {messages.map((msg, index) => (
+              <div
+                key={index}
+                className={`max-w-[85%] p-3 text-[15px] leading-relaxed rounded-2xl ${
+                  msg.isUser
+                    ? "bg-secondary text-white ml-auto rounded-br-md"
+                    : "bg-primary text-light rounded-bl-md shadow-sm border border-border"
+                }`}
+              >
+                {msg.text}
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+        </div>
+      </main>
+
+      {/* Input field - fixed bottom like App.tsx navbar */}
+      <div className="fixed bottom-0 left-0 right-0 px-4 pb-6 pt-4 z-10 bg-gradient-to-t from-light via-light to-transparent">
+        <div className="w-full max-w-md mx-auto">
+          <div className="flex items-center bg-white rounded-full p-2 shadow-sm border border-border">
             <input
               type="text"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Ask me anything about food..."
-              className="flex-1 bg-transparent focus:outline-none text-primary px-2 text-[15px]"
+              className="flex-1 bg-transparent focus:outline-none text-primary px-3 text-[15px] placeholder:text-gray"
             />
             <button
               onClick={handleSendMessage}
               disabled={!inputText.trim()}
-              className="px-5 py-3 rounded-full text-xl font-bold transition-colors bg-primary text-white"
+              className={`px-4 py-3 rounded-full text-lg transition-all ${
+                inputText.trim()
+                  ? "bg-primary text-white active:scale-95"
+                  : "bg-muted text-gray cursor-not-allowed"
+              }`}
             >
               <RiSendPlaneLine />
             </button>
