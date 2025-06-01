@@ -1,4 +1,4 @@
-import { RiBowlFill, RiChatAiFill, RiCodeSSlashFill } from "react-icons/ri";
+import { RiBowlFill, RiChatAiFill, RiUserSmileFill } from "react-icons/ri";
 import { useLocation, Link } from "react-router-dom";
 
 function Navbar() {
@@ -8,7 +8,7 @@ function Navbar() {
   const navItems = [
     { id: "/", icon: <RiBowlFill size={20} />, route: "/" },
     { id: "/chat", icon: <RiChatAiFill size={20} />, route: "/chat" },
-    { id: "/about", icon: <RiCodeSSlashFill size={20} />, route: "/about" },
+    { id: "/about", icon: <RiUserSmileFill size={20} />, route: "/about" },
   ];
 
   return (
