@@ -184,7 +184,7 @@ function Chat() {
               onChange={(e) => setInputText(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Ask me anything about food..."
-              className="flex-1 bg-transparent focus:outline-none text-primary px-3 text-[15px] placeholder:text-gray"
+              className="flex-1 bg-transparent focus:outline-none text-primary px-3 text-[15px] font-funnel font-semibold placeholder:text-gray"
             />
             <button
               onClick={handleSendMessage}

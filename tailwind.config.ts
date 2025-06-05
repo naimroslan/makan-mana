@@ -6,6 +6,9 @@ export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      fontFamily: {
+        funnel: ['"Funnel Display"', "serif"],
+      },
       colors: {
         primary: "#111111",
         secondary: "#16C784",

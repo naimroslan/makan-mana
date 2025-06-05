@@ -200,7 +200,7 @@ function App() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && onSearch()}
-                className="flex-1 bg-transparent focus:outline-none text-primary px-2"
+                className="flex-1 bg-transparent focus:outline-none text-primary px-2 font-funnel font-semibold"
                 placeholder="What you feel like eating?"
               />
               <button
