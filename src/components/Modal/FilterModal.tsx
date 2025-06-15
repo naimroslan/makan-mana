@@ -1,26 +1,24 @@
 import { useState, useRef, useEffect } from "react";
 
+interface FilterOption {
+  label: string;
+  value: string;
+}
+
 interface FilterModalProps {
   isOpen: boolean;
   onClose: () => void;
   onApply: (filters: {
-    place: string[];
-    type: string[];
-    origin: string[];
+    place: FilterOption[];
+    type: FilterOption[];
+    origin: FilterOption[];
   }) => void;
   filterOptions: {
-    place: string[];
-    type: string[];
-    origin: string[];
+    place: FilterOption[];
+    type: FilterOption[];
+    origin: FilterOption[];
   };
   isLoading?: boolean;
-}
-
-function formatLabel(text: string) {
-  return text
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
 }
 
 function FilterModal({
@@ -30,35 +28,36 @@ function FilterModal({
   filterOptions,
   isLoading = false,
 }: FilterModalProps) {
-  const [selected, setSelected] = useState({
-    place: [] as string[],
-    type: [] as string[],
-    origin: [] as string[],
-  });
+  const [selected, setSelected] = useState<{
+    place: FilterOption[];
+    type: FilterOption[];
+    origin: FilterOption[];
+  }>({ place: [], type: [], origin: [] });
 
   const modalRef = useRef<HTMLDivElement>(null);
 
-  const toggle = (key: "place" | "type" | "origin", value: string) => {
+  const toggle = (key: "place" | "type" | "origin", option: FilterOption) => {
     setSelected((prev) => {
-      const current = new Set(prev[key]);
-      if (current.has(value)) {
-        current.delete(value);
-      } else {
-        current.add(value);
-      }
-      return { ...prev, [key]: Array.from(current) };
+      const exists = prev[key].some((item) => item.value === option.value);
+      return {
+        ...prev,
+        [key]: exists
+          ? prev[key].filter((item) => item.value !== option.value)
+          : [...prev[key], option],
+      };
     });
   };
 
   const handleApply = () => {
     onApply(selected);
+    setSelected({ place: [], type: [], origin: [] });
+    onClose();
   };
 
   const clearAll = () => {
     setSelected({ place: [], type: [], origin: [] });
   };
 
-  // Close on click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -69,21 +68,9 @@ function FilterModal({
       }
     };
 
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    if (isOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen, onClose]);
-
-  // Reset selections when modal opens
-  useEffect(() => {
-    if (isOpen) {
-      setSelected({ place: [], type: [], origin: [] });
-    }
-  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -91,6 +78,9 @@ function FilterModal({
     selected.place.length > 0 ||
     selected.type.length > 0 ||
     selected.origin.length > 0;
+
+  const isSelected = (key: "place" | "type" | "origin", value: string) =>
+    selected[key].some((item) => item.value === value);
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex justify-center items-center p-4">
@@ -117,16 +107,16 @@ function FilterModal({
           <div className="flex flex-wrap gap-2">
             {filterOptions.place.map((p) => (
               <button
-                key={p}
+                key={p.value}
                 onClick={() => toggle("place", p)}
                 disabled={isLoading}
                 className={`px-3 py-1 rounded-full text-sm border transition-colors ${
-                  selected.place.includes(p)
+                  isSelected("place", p.value)
                     ? "bg-primary text-white border-primary"
                     : "bg-light text-primary border-primary-light hover:bg-primary-light"
                 } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
               >
-                {formatLabel(p)}
+                {p.label}
               </button>
             ))}
           </div>
@@ -140,16 +130,16 @@ function FilterModal({
           <div className="flex flex-wrap gap-2">
             {filterOptions.type.map((t) => (
               <button
-                key={t}
+                key={t.value}
                 onClick={() => toggle("type", t)}
                 disabled={isLoading}
                 className={`px-3 py-1 rounded-full text-sm border transition-colors ${
-                  selected.type.includes(t)
+                  isSelected("type", t.value)
                     ? "bg-primary text-white border-primary"
                     : "bg-light text-primary border-primary-light hover:bg-primary-light"
                 } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
               >
-                {formatLabel(t)}
+                {t.label}
               </button>
             ))}
           </div>
@@ -163,16 +153,16 @@ function FilterModal({
           <div className="flex flex-wrap gap-2">
             {filterOptions.origin.map((o) => (
               <button
-                key={o}
+                key={o.value}
                 onClick={() => toggle("origin", o)}
                 disabled={isLoading}
                 className={`px-3 py-1 rounded-full text-sm border transition-colors ${
-                  selected.origin.includes(o)
+                  isSelected("origin", o.value)
                     ? "bg-primary text-white border-primary"
                     : "bg-light text-primary border-primary-light hover:bg-primary-light"
                 } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
               >
-                {formatLabel(o)}
+                {o.label}
               </button>
             ))}
           </div>
