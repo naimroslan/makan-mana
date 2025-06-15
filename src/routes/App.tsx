@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { RiFilter3Fill, RiSearchFill } from "react-icons/ri";
+import { RiFilter3Fill, RiMapPinLine, RiSearchFill } from "react-icons/ri";
 import { gsap } from "gsap";
 
 import Navbar from "../components/Menu/Navbar";
 import FilterModal from "../components/Modal/FilterModal";
+import GetLocationModal from "../components/Modal/GetLocationModal";
+import { buildFilterURL } from "../utils/filters";
 
 const ROLL_DURATION = 3;
 const VISIBLE_ITEM_HEIGHT = 60;
@@ -19,10 +21,15 @@ interface RestaurantData {
   [location: string]: Restaurant[];
 }
 
+interface FilterOption {
+  label: string; // Display to user (e.g., 'Sunway Putra Mall')
+  value: string; // Sent to backend (e.g., 'sunway putra mall')
+}
+
 interface FilterOptions {
-  place: string[];
-  type: string[];
-  origin: string[];
+  place: FilterOption[];
+  type: FilterOption[];
+  origin: FilterOption[];
 }
 
 function App() {
@@ -33,7 +40,7 @@ function App() {
     null,
   );
   const [restaurants, setRestaurants] = useState<string[]>([]);
-  const [originalRestaurants, setOriginalRestaurants] = useState<string[]>([]); // Store original list
+  const [originalRestaurants, setOriginalRestaurants] = useState<string[]>([]);
   const [restaurantData, setRestaurantData] = useState<RestaurantData>({});
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     place: [],
@@ -43,24 +50,53 @@ function App() {
   const [search, setSearch] = useState("");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isFilterLoading, setIsFilterLoading] = useState(false);
+  const [isFilterOptionsLoading, setIsFilterOptionsLoading] = useState(false);
   const [hasActiveFilters, setHasActiveFilters] = useState(false);
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [hasUserLocation, setHasUserLocation] = useState(false);
+  const [pendingNearbyFilter, setPendingNearbyFilter] =
+    useState<FilterOptions | null>(null);
 
-  const extractFilterOptions = (data: RestaurantData): FilterOptions => {
-    const places = Object.keys(data);
+  // ✅ Only check if user *already* has a location stored
+  useEffect(() => {
+    const loc = localStorage.getItem("makanmana_user_loc");
+    setHasUserLocation(!!loc);
+  }, []);
+
+  const extractFilterOptions = (
+    data: RestaurantData | Restaurant[],
+  ): FilterOptions => {
+    const placeSet = new Set<string>();
     const typeSet = new Set<string>();
     const originSet = new Set<string>();
 
-    Object.values(data).forEach((restaurants) => {
-      restaurants.forEach((restaurant) => {
+    if (Array.isArray(data)) {
+      data.forEach((restaurant) => {
+        if ("location" in restaurant && restaurant.location) {
+          placeSet.add(restaurant.location);
+        }
         restaurant.type?.forEach((c) => typeSet.add(c));
         restaurant.origin?.forEach((o) => originSet.add(o));
       });
+    } else {
+      Object.entries(data).forEach(([place, restaurants]) => {
+        placeSet.add(place);
+        restaurants.forEach((restaurant) => {
+          restaurant.type?.forEach((c) => typeSet.add(c));
+          restaurant.origin?.forEach((o) => originSet.add(o));
+        });
+      });
+    }
+
+    const toFilterOption = (item: string): FilterOption => ({
+      label: item,
+      value: item.toLowerCase(), // ensure value is lowercase for backend
     });
 
     return {
-      place: places,
-      type: Array.from(typeSet),
-      origin: Array.from(originSet),
+      place: Array.from(placeSet).map(toFilterOption),
+      type: Array.from(typeSet).map(toFilterOption),
+      origin: Array.from(originSet).map(toFilterOption),
     };
   };
 
@@ -68,6 +104,36 @@ function App() {
     return Object.values(data)
       .flat()
       .map((r) => r.name);
+  };
+
+  // ✅ Only request location when user clicks
+  const handleGetLocation = () => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const rounded = (num: number) => Number(num.toFixed(5));
+        const { latitude, longitude } = position.coords;
+        const locationData = {
+          latitude: rounded(latitude),
+          longitude: rounded(longitude),
+        };
+        localStorage.setItem(
+          "makanmana_user_loc",
+          JSON.stringify(locationData),
+        );
+        setHasUserLocation(true);
+        setShowLocationModal(false);
+
+        if (pendingNearbyFilter) {
+          handleApplyFilter(pendingNearbyFilter);
+          setPendingNearbyFilter(null);
+        }
+      },
+      (error) => {
+        console.error("Location access denied or error:", error);
+        alert("Unable to get your location. Please enable location access.");
+        setPendingNearbyFilter(null);
+      },
+    );
   };
 
   useEffect(() => {
@@ -128,41 +194,40 @@ function App() {
     navigate("/chat", { state: { query: trimmed } });
   };
 
+  const handleRestaurantClick = (restaurantName: string) => {
+    navigate("/chat", { state: { query: restaurantName } });
+  };
+
   const handleApplyFilter = async (selectedFilters: FilterOptions) => {
+    const isNearby = selectedFilters.place.some((p) => p.value === "nearby");
+
+    if (isNearby) {
+      const locationStr = localStorage.getItem("makanmana_user_loc");
+      if (!locationStr) {
+        setPendingNearbyFilter(selectedFilters);
+        setShowLocationModal(true);
+        return;
+      }
+    }
+
     setIsFilterLoading(true);
 
     try {
-      const params = new URLSearchParams();
+      const params = buildFilterURL(selectedFilters); // ✅ Don't manually add nearby again
+      const url = `${process.env.MAKANMANA_API_URL}${params}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 
-      selectedFilters.place.forEach((p) => params.append("place", p));
-      selectedFilters.type.forEach((t) => params.append("type", t));
-      selectedFilters.origin.forEach((o) => params.append("origin", o));
+      const filteredNames = await res.json();
 
-      const res = await fetch(
-        `${process.env.MAKANMANA_API_URL}/filter?${params.toString()}`,
-      );
+      const restaurantNames = Object.values(filteredNames)
+        .flat()
+        .map((r) => r.name);
 
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
-
-      const data = await res.json();
-
-      // Handle different response formats
-      let filteredNames: string[];
-      if (Array.isArray(data)) {
-        filteredNames = data;
-      } else {
-        filteredNames = Object.values(data)
-          .flat()
-          .map((r: any) => r.name);
-      }
-
-      setRestaurants(filteredNames);
+      setRestaurants(restaurantNames);
       setSelectedRestaurant(null);
       setHasActiveFilters(true);
 
-      // Reset GSAP position
       if (containerRef.current) {
         gsap.set(containerRef.current, { y: 0 });
       }
@@ -175,12 +240,49 @@ function App() {
     }
   };
 
+  const openFilterModal = async () => {
+    if (
+      filterOptions.place.length === 0 &&
+      filterOptions.type.length === 0 &&
+      filterOptions.origin.length === 0
+    ) {
+      try {
+        setIsFilterOptionsLoading(true);
+        const res = await fetch(
+          `${process.env.MAKANMANA_API_URL}/filter-options`,
+        );
+        const data = await res.json();
+
+        setFilterOptions({
+          place: [
+            { label: "Nearby", value: "nearby" }, // ensure value lowercase for backend
+            { label: "Sunway Putra Mall", value: "sunway-putra-mall" },
+            { label: "TRX Mall", value: "trx-mall" },
+          ],
+          type: data.type.map((item: string) => ({
+            label: item,
+            value: item.toLowerCase(),
+          })),
+          origin: data.origin.map((item: string) => ({
+            label: item,
+            value: item.toLowerCase(),
+          })),
+        });
+      } catch (err) {
+        console.error("Failed to load filter options:", err);
+        alert("Failed to load filter options. Please try again.");
+      } finally {
+        setIsFilterOptionsLoading(false);
+      }
+    }
+    setIsFilterOpen(true);
+  };
+
   const resetFilters = () => {
     setRestaurants(originalRestaurants);
     setSelectedRestaurant(null);
     setHasActiveFilters(false);
 
-    // Reset GSAP position
     if (containerRef.current) {
       gsap.set(containerRef.current, { y: 0 });
     }
@@ -214,14 +316,25 @@ function App() {
           </div>
 
           <div className="flex items-center justify-between">
-            <h2 className="text-primary text-xl font-semibold">
-              Today's Pick
+            <div className="flex items-center gap-1">
+              <h2 className="text-primary text-xl font-semibold">
+                Today's Pick
+              </h2>
               {hasActiveFilters && (
-                <span className="text-sm font-normal text-gray ml-2">
+                <span className="text-sm font-normal text-gray">
                   ({restaurants.length} filtered)
                 </span>
               )}
-            </h2>
+              {!hasUserLocation && (
+                <button
+                  onClick={() => setShowLocationModal(true)}
+                  className="p-1 transition-colors text-gray hover:text-primary"
+                >
+                  <RiMapPinLine className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+
             <div className="flex items-center gap-2">
               {hasActiveFilters && (
                 <button
@@ -232,7 +345,7 @@ function App() {
                 </button>
               )}
               <button
-                onClick={() => setIsFilterOpen(true)}
+                onClick={openFilterModal}
                 className={`p-1 transition-colors ${hasActiveFilters ? "text-primary" : "text-gray"}`}
               >
                 <RiFilter3Fill className="w-6 h-6" />
@@ -253,7 +366,8 @@ function App() {
                   return (
                     <div
                       key={name + i}
-                      className={`h-[60px] flex items-center justify-center text-xl font-semibold transition-opacity ${
+                      onClick={() => handleRestaurantClick(name)}
+                      className={`h-[60px] flex items-center justify-center text-xl font-semibold transition-opacity cursor-pointer ${
                         isSelected
                           ? "text-primary opacity-100"
                           : "text-gray opacity-30"
@@ -307,7 +421,6 @@ function App() {
         </div>
       </main>
 
-      {/* Navbar fixed to bottom */}
       <Navbar className="fixed bottom-0 left-0 right-0 z-50" />
 
       <FilterModal
@@ -315,8 +428,16 @@ function App() {
         onClose={() => setIsFilterOpen(false)}
         onApply={handleApplyFilter}
         filterOptions={filterOptions}
-        isLoading={isFilterLoading}
+        isLoading={isFilterOptionsLoading} // ✅ Pass this if your FilterModal handles loading UI
       />
+
+      {showLocationModal && (
+        <GetLocationModal
+          onAllow={() => setShowLocationModal(false)}
+          onClose={() => setShowLocationModal(false)}
+          onRequestLocation={handleGetLocation}
+        />
+      )}
     </div>
   );
 }
