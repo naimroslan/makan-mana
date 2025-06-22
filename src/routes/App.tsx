@@ -59,7 +59,7 @@ function App() {
 
   // ✅ Only check if user *already* has a location stored
   useEffect(() => {
-    const loc = localStorage.getItem("makanmana_user_loc");
+    const loc = sessionStorage.getItem("makanmana_user_loc");
     setHasUserLocation(!!loc);
   }, []);
 
@@ -116,7 +116,7 @@ function App() {
           latitude: rounded(latitude),
           longitude: rounded(longitude),
         };
-        localStorage.setItem(
+        sessionStorage.setItem(
           "makanmana_user_loc",
           JSON.stringify(locationData),
         );
@@ -202,7 +202,7 @@ function App() {
     const isNearby = selectedFilters.place.some((p) => p.value === "nearby");
 
     if (isNearby) {
-      const locationStr = localStorage.getItem("makanmana_user_loc");
+      const locationStr = sessionStorage.getItem("makanmana_user_loc");
       if (!locationStr) {
         setPendingNearbyFilter(selectedFilters);
         setShowLocationModal(true);

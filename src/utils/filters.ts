@@ -8,7 +8,7 @@ export const buildFilterURL = (selectedFilters: {
   const hasNearby = selectedFilters.place.some((p) => p.value === "nearby");
 
   if (hasNearby) {
-    const loc = localStorage.getItem("makanmana_user_loc");
+    const loc = sessionStorage.getItem("makanmana_user_loc");
     if (loc) {
       const { latitude, longitude } = JSON.parse(loc);
       params.append("nearby", `${latitude},${longitude}`);
