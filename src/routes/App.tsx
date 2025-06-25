@@ -213,18 +213,18 @@ function App() {
     setIsFilterLoading(true);
 
     try {
-      const params = buildFilterURL(selectedFilters); // ✅ Don't manually add nearby again
+      const params = buildFilterURL(selectedFilters);
       const url = `${process.env.MAKANMANA_API_URL}${params}`;
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 
-      const filteredNames = await res.json();
-
-      const restaurantNames = Object.values(filteredNames)
+      const filteredData = await res.json(); // this is grouped by location
+      console.log("Filtered API response:", filteredData);
+      const restaurantNames: string[] = Object.values(filteredData)
         .flat()
-        .map((r) => r.name);
+        .filter(Boolean); // assumes flat list of strings
 
-      setRestaurants(restaurantNames);
+      setRestaurants(restaurantNames); // <- ensures rolling section works
       setSelectedRestaurant(null);
       setHasActiveFilters(true);
 
