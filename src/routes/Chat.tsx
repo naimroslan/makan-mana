@@ -15,6 +15,7 @@ function Chat() {
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState(initialQuery);
+  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const purpleBlobRef = useRef<HTMLDivElement>(null);
   const blueBlobRef = useRef<HTMLDivElement>(null);
@@ -51,15 +52,15 @@ function Chat() {
     animateBlob(blueBlobRef, 60, 14, true);
   }, []);
 
-  // Scroll to bottom on message update - contained within messages area
+  // Scroll to bottom on message update or typing
   useEffect(() => {
     if (messagesEndRef.current) {
-      const messagesContainer = messagesEndRef.current.parentElement;
-      if (messagesContainer) {
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      const container = messagesEndRef.current.parentElement;
+      if (container) {
+        container.scrollTop = container.scrollHeight;
       }
     }
-  }, [messages]);
+  }, [messages, isTyping]);
 
   // Initial welcome and optional query
   useEffect(() => {
@@ -87,6 +88,7 @@ function Chat() {
     }
 
     setInputText("");
+    setIsTyping(true);
 
     try {
       const res = await fetch(`${process.env.MAKANMANA_API_URL}/chat`, {
@@ -112,6 +114,8 @@ function Chat() {
         ...prev,
         { text: "Something went wrong. Try again later.", isUser: false },
       ]);
+    } finally {
+      setIsTyping(false);
     }
   };
 
@@ -125,7 +129,7 @@ function Chat() {
 
   return (
     <div className="min-h-screen bg-light flex flex-col relative overflow-hidden">
-      {/* Animated blobs - moved to background */}
+      {/* Animated blobs */}
       <div className="fixed inset-0 z-0 flex items-center justify-center pointer-events-none">
         <div
           ref={purpleBlobRef}
@@ -137,10 +141,10 @@ function Chat() {
         />
       </div>
 
-      {/* Glass overlay - lighter for better readability */}
+      {/* Glass overlay */}
       <div className="absolute inset-0 bg-white/20 backdrop-blur-xl z-0" />
 
-      {/* Header - following App.tsx pattern */}
+      {/* Header */}
       <header className="relative z-10 px-4 py-6 bg-transparent">
         <div className="w-full max-w-md mx-auto">
           <div className="relative flex items-center justify-center">
@@ -155,7 +159,7 @@ function Chat() {
         </div>
       </header>
 
-      {/* Messages - contained scrolling area */}
+      {/* Messages */}
       <main className="flex-1 relative z-10 px-4 pb-24">
         <div className="w-full max-w-md mx-auto h-full">
           <div className="h-full overflow-y-auto space-y-3 pr-2">
@@ -171,12 +175,19 @@ function Chat() {
                 {msg.text}
               </div>
             ))}
+            {isTyping && (
+              <div className="bg-primary text-light px-4 py rounded-xl rounded-bl-md inline-block border border-border w-fit">
+                <span className="dot-wave">.</span>
+                <span className="dot-wave animation-delay-150">.</span>
+                <span className="dot-wave animation-delay-300">.</span>
+              </div>
+            )}
             <div ref={messagesEndRef} />
           </div>
         </div>
       </main>
 
-      {/* Input field - fixed bottom like App.tsx navbar */}
+      {/* Input field */}
       <div className="fixed bottom-0 left-0 right-0 px-4 pb-6 pt-4 z-10 bg-gradient-to-t from-light via-light to-transparent">
         <div className="w-full max-w-md mx-auto">
           <div className="flex items-center bg-white rounded-full p-2 shadow-sm border border-border">

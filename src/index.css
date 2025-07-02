@@ -6,6 +6,32 @@
     font-display: swap;
 }
 
+@keyframes wave {
+    0%,
+    60%,
+    100% {
+        transform: initial;
+    }
+    30% {
+        transform: translateY(-6px);
+    }
+}
+
+.dot-wave {
+    display: inline-block;
+    font-size: 22px;
+    margin: 0 2px;
+    animation: wave 1.2s infinite ease-in-out;
+}
+
+.animation-delay-150 {
+    animation-delay: 0.15s;
+}
+
+.animation-delay-300 {
+    animation-delay: 0.3s;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
