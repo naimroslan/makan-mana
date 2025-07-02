@@ -14,6 +14,9 @@ RUN pnpm install --frozen-lockfile
 # Copy the rest of the app
 COPY . .
 
+# Explicitly copy the production env
+COPY .env.production .env
+
 # Build the app
 RUN pnpm run build
 

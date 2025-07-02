@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "rsbuild dev",
-    "build": "rsbuild build",
+    "dev": "dotenv -e .env.local rsbuild dev",
+    "build": "dotenv -e .env.production rsbuild build",
     "lint": "eslint .",
     "preview": "rsbuild preview",
     "start": "rsbuild preview --host 0.0.0.0 --port 3002"
@@ -26,6 +26,7 @@
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.18",
+    "dotenv-cli": "^8.0.0",
     "eslint": "^9.9.1",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.11",
