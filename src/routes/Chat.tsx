@@ -100,7 +100,9 @@ function Chat() {
       setMessages((prev) => [
         ...prev,
         {
-          text: json.response || "Sorry, I couldn't find anything 😅",
+          text:
+            json.response ||
+            "Oh no, my owner must have forgeten to buy more credits 🙏 I'll let him know",
           isUser: false,
         },
       ]);
