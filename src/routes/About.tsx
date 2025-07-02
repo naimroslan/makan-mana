@@ -3,11 +3,23 @@ import Navbar from "../components/Menu/Navbar";
 function About() {
   return (
     <div className="min-h-screen bg-white flex flex-col justify-center items-center px-6 py-10 space-y-8 text-center">
-      <h2 className="text-3xl font-bold text-primary leading-snug">
-        Thank you for using
+      <h2 className="text-3xl font-bold text-primary leading">
+        Built with love,
         <br />
-        my creations
+        shared with you.
       </h2>
+
+      <p className="text-sm text-gray-500">
+        Check out my portfolio at{" "}
+        <a
+          href="https://naimroslan.dev"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary underline hover:text-primary-dark transition"
+        >
+          naimroslan.dev
+        </a>
+      </p>
 
       {/* <p className="text-sm text-dark tracking-wide uppercase">Creations</p>
 
