@@ -1,25 +1,17 @@
-FROM node:20-alpine
+# Build stage
+FROM node:20-alpine AS builder
 
-WORKDIR /src
-
-# Install pnpm manually
-RUN npm install -g pnpm@latest
-
-# Copy package manager files
+WORKDIR /app
+RUN npm install -g pnpm
 COPY package.json pnpm-lock.yaml ./
-
-# Install dependencies
-RUN pnpm install --frozen-lockfile
-
-# Copy the rest of the app
+RUN pnpm install
 COPY . .
-
-# Explicitly copy the production env
 COPY .env.production .env
-
-# Build the app
 RUN pnpm run build
 
-EXPOSE 3002
-
-CMD ["pnpm", "run", "start"]
+# Serve stage with Nginx
+FROM nginx:alpine
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY --from=builder /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
