@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "@remix-run/react";
 import { RiSendPlaneLine, RiArrowLeftLine } from "react-icons/ri";
 import { gsap } from "gsap";
 
@@ -91,7 +91,7 @@ function Chat() {
     setIsTyping(true);
 
     try {
-      const res = await fetch(`${process.env.MAKANMANA_API_URL}/chat`, {
+      const res = await fetch(`${import.meta.env.VITE_MAKANMANA}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: trimmed }),

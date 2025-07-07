@@ -1,13 +1,13 @@
-/** @type {import('tailwindcss').Config} */
-
 import type { Config } from "tailwindcss";
 
 export default {
-  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  darkMode: "class",
+  content: ["./app/**/{**,.client,.server}/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
       fontFamily: {
         funnel: ['"Funnel Display"', "serif"],
+        sans: ['"Funnel Display"', "serif"],
       },
       colors: {
         primary: "#111111",

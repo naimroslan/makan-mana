@@ -1,5 +1,5 @@
 import { RiBowlFill, RiChatAiFill, RiUserSmileFill } from "react-icons/ri";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link } from "@remix-run/react";
 
 function Navbar() {
   const location = useLocation();

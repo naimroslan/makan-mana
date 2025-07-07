@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@remix-run/react";
 import { RiFilter3Fill, RiMapPinLine, RiSearchFill } from "react-icons/ri";
 import { gsap } from "gsap";
 
-import Navbar from "../components/Menu/Navbar";
-import FilterModal from "../components/Modal/FilterModal";
-import GetLocationModal from "../components/Modal/GetLocationModal";
-import { buildFilterURL } from "../utils/filters";
+import Navbar from "~/components/menu/Navbar";
+import FilterModal from "~/components/modal/FilterModal";
+import GetLocationModal from "~/components/modal/GetLocationModal";
+import { buildFilterURL } from "~/utils/filters";
 
 const ROLL_DURATION = 3;
 const VISIBLE_ITEM_HEIGHT = 60;
@@ -139,7 +139,9 @@ function App() {
   useEffect(() => {
     const fetchRestaurants = async () => {
       try {
-        const res = await fetch(`${process.env.MAKANMANA_API_URL}/restaurants`);
+        const res = await fetch(
+          `${import.meta.env.VITE_MAKANMANA}/restaurants`,
+        );
         const json = await res.json();
 
         if (json.data && Array.isArray(json.data)) {
@@ -214,12 +216,11 @@ function App() {
 
     try {
       const params = buildFilterURL(selectedFilters);
-      const url = `${process.env.MAKANMANA_API_URL}${params}`;
+      const url = `${import.meta.env.VITE_MAKANMANA}${params}`;
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 
       const filteredData = await res.json(); // this is grouped by location
-      console.log("Filtered API response:", filteredData);
       const restaurantNames: string[] = Object.values(filteredData)
         .flat()
         .filter(Boolean); // assumes flat list of strings
@@ -249,7 +250,7 @@ function App() {
       try {
         setIsFilterOptionsLoading(true);
         const res = await fetch(
-          `${process.env.MAKANMANA_API_URL}/filter-options`,
+          `${import.meta.env.VITE_MAKANMANA}/filter-options`,
         );
         const data = await res.json();
 
