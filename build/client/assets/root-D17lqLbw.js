@@ -1,0 +1,10 @@
+import{u,d as y,r as i,j as e,O as d}from"./index-CFxg3Tr1.js";import{h as x,j as g,_ as j,S as w}from"./components-JMU3ypcm.js";/**
+ * @remix-run/react v2.16.8
+ *
+ * Copyright (c) Remix Software Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE.md file in the root directory of this source tree.
+ *
+ * @license MIT
+ */let a="positions";function S({getKey:t,...l}){let{isSpaMode:c}=x(),o=u(),p=y();g({getKey:t,storageKey:a});let m=i.useMemo(()=>{if(!t)return null;let s=t(o,p);return s!==o.key?s:null},[]);if(c)return null;let h=((s,f)=>{if(!window.history.state||!window.history.state.key){let n=Math.random().toString(32).slice(2);window.history.replaceState({key:n},"")}try{let r=JSON.parse(sessionStorage.getItem(s)||"{}")[f||window.history.state.key];typeof r=="number"&&window.scrollTo(0,r)}catch(n){console.error(n),sessionStorage.removeItem(s)}}).toString();return i.createElement("script",j({},l,{suppressHydrationWarning:!0,dangerouslySetInnerHTML:{__html:`(${h})(${JSON.stringify(a)}, ${JSON.stringify(m)})`}}))}const b=()=>[{rel:"preconnect",href:"https://fonts.googleapis.com"},{rel:"preconnect",href:"https://fonts.gstatic.com",crossOrigin:"anonymous"},{rel:"stylesheet",href:"https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap"}];function M({children:t}){return e.jsxs("html",{lang:"en",children:[e.jsxs("head",{children:[e.jsx("meta",{charSet:"UTF-8"}),e.jsx("link",{rel:"icon",type:"image/png",href:"favicon.ico"}),e.jsx("link",{rel:"manifest",href:"/manifest.json",type:"application/manifest+json"}),e.jsx("meta",{name:"theme-color",content:"#fafafa"}),e.jsx("meta",{name:"mobile-web-app-capable",content:"yes"}),e.jsx("link",{rel:"apple-touch-icon",href:"/icons/icon-192.png"}),e.jsx("meta",{name:"viewport",content:"width=device-width, initial-scale=1.0"}),e.jsx("title",{children:"makan mana"})]}),e.jsxs("body",{children:[t,e.jsx(S,{}),e.jsx(w,{})]})]})}function v(){return e.jsx(d,{})}export{M as Layout,v as default,b as links};

@@ -7,6 +7,7 @@ import Navbar from "../components/Menu/Navbar";
 import FilterModal from "../components/Modal/FilterModal";
 import GetLocationModal from "../components/Modal/GetLocationModal";
 import { buildFilterURL } from "../utils/filters";
+import { getSessionItem } from "../utils/session";
 
 const ROLL_DURATION = 3;
 const VISIBLE_ITEM_HEIGHT = 60;
@@ -57,7 +58,6 @@ function App() {
   const [pendingNearbyFilter, setPendingNearbyFilter] =
     useState<FilterOptions | null>(null);
 
-  // ✅ Only check if user *already* has a location stored
   useEffect(() => {
     const loc = sessionStorage.getItem("makanmana_user_loc");
     setHasUserLocation(!!loc);
@@ -202,8 +202,10 @@ function App() {
     const isNearby = selectedFilters.place.some((p) => p.value === "nearby");
 
     if (isNearby) {
-      const locationStr = sessionStorage.getItem("makanmana_user_loc");
-      if (!locationStr) {
+      const location = getSessionItem<{ latitude: number; longitude: number }>(
+        "makanmana_user_loc",
+      );
+      if (!location) {
         setPendingNearbyFilter(selectedFilters);
         setShowLocationModal(true);
         return;
