@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "@remix-run/react";
 import { RiSendPlaneLine, RiArrowLeftLine } from "react-icons/ri";
 import { gsap } from "gsap";
+import { getSessionItem, setSessionItem } from "~/utils/session";
+import { v4 as uuidv4 } from "uuid";
 
 interface Message {
   text: string;
@@ -21,7 +23,6 @@ function Chat() {
   const blueBlobRef = useRef<HTMLDivElement>(null);
   const hasSentInitial = useRef(false);
 
-  // Animate blobs
   useEffect(() => {
     const animateBlob = (
       ref: React.RefObject<HTMLDivElement>,
@@ -79,6 +80,14 @@ function Chat() {
     }
   }, [initialQuery]);
 
+  useEffect(() => {
+    const existing = getSessionItem("chat_session_id");
+    if (!existing) {
+      const newId = uuidv4();
+      setSessionItem("chat_session_id", newId);
+    }
+  });
+
   const sendMessage = async (text: string, auto = false) => {
     const trimmed = text.trim();
     if (!trimmed) return;
@@ -91,10 +100,12 @@ function Chat() {
     setIsTyping(true);
 
     try {
+      const sessionId = getSessionItem("chat_session_id");
+
       const res = await fetch(`${import.meta.env.VITE_MAKANMANA}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: trimmed }),
+        body: JSON.stringify({ query: trimmed, sessionId }),
       });
 
       const json = await res.json();

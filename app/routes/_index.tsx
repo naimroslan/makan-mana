@@ -7,6 +7,7 @@ import Navbar from "~/components/menu/Navbar";
 import FilterModal from "~/components/modal/FilterModal";
 import GetLocationModal from "~/components/modal/GetLocationModal";
 import { buildFilterURL } from "~/utils/filters";
+import { getSessionItem } from "~/utils/session";
 
 const ROLL_DURATION = 3;
 const VISIBLE_ITEM_HEIGHT = 60;
@@ -204,8 +205,10 @@ function App() {
     const isNearby = selectedFilters.place.some((p) => p.value === "nearby");
 
     if (isNearby) {
-      const locationStr = sessionStorage.getItem("makanmana_user_loc");
-      if (!locationStr) {
+      const location = getSessionItem<{ latitude: number; longitude: number }>(
+        "makanmana_user_loc",
+      );
+      if (!location) {
         setPendingNearbyFilter(selectedFilters);
         setShowLocationModal(true);
         return;
@@ -220,12 +223,12 @@ function App() {
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 
-      const filteredData = await res.json(); // this is grouped by location
+      const filteredData = await res.json();
       const restaurantNames: string[] = Object.values(filteredData)
         .flat()
-        .filter(Boolean); // assumes flat list of strings
+        .filter(Boolean);
 
-      setRestaurants(restaurantNames); // <- ensures rolling section works
+      setRestaurants(restaurantNames);
       setSelectedRestaurant(null);
       setHasActiveFilters(true);
 
