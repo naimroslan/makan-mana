@@ -1,4 +1,5 @@
 export const buildFilterURL = (selectedFilters: {
+  city: { label: string; value: string }[];
   place: { label: string; value: string }[];
   type: { label: string; value: string }[];
   origin: { label: string; value: string }[];
@@ -15,10 +16,10 @@ export const buildFilterURL = (selectedFilters: {
     }
   }
 
+  selectedFilters.city.forEach((city) => params.append("city", city.value));
   selectedFilters.place
     .filter((p) => p.value !== "nearby")
     .forEach((p) => params.append("place", p.value));
-
   selectedFilters.type.forEach((type) => params.append("type", type.value));
   selectedFilters.origin.forEach((origin) =>
     params.append("origin", origin.value),
