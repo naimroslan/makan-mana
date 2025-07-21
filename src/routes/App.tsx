@@ -8,6 +8,7 @@ import FilterModal from "../components/Modal/FilterModal";
 import GetLocationModal from "../components/Modal/GetLocationModal";
 import { buildFilterURL } from "../utils/filters";
 import { getSessionItem } from "../utils/session";
+import { API } from "../utils/api";
 
 const ROLL_DURATION = 3;
 const VISIBLE_ITEM_HEIGHT = 60;
@@ -141,7 +142,7 @@ function App() {
   useEffect(() => {
     const fetchRestaurants = async () => {
       try {
-        const res = await fetch(`${process.env.MAKANMANA_API_URL}/restaurants`);
+        const res = await fetch(API.RESTAURANTS);
         const json = await res.json();
 
         if (json.data && Array.isArray(json.data)) {
@@ -252,9 +253,7 @@ function App() {
     ) {
       try {
         setIsFilterOptionsLoading(true);
-        const res = await fetch(
-          `${process.env.MAKANMANA_API_URL}/filter-options`,
-        );
+        const res = await fetch(API.FILTER_OPTIONS);
         const data = await res.json();
 
         setFilterOptions({
