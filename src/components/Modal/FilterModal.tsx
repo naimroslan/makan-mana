@@ -86,7 +86,7 @@ function FilterModal({
     <div className="fixed inset-0 z-50 bg-black/40 flex justify-center items-center p-4">
       <div
         ref={modalRef}
-        className="bg-white rounded-xl p-4 w-full max-w-md max-h-[90vh] overflow-auto"
+        className="bg-white rounded-xl p-4 w-full max-w-md h-[60vh] overflow-hidden flex flex-col"
       >
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-primary">Filter</h2>
@@ -99,77 +99,81 @@ function FilterModal({
           </button>
         </div>
 
-        {/* Place */}
-        <div className="mb-4">
-          <h3 className="text-sm font-medium text-gray mb-2">
-            Place {selected.place.length > 0 && `(${selected.place.length})`}
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {filterOptions.place.map((p) => (
-              <button
-                key={p.value}
-                onClick={() => toggle("place", p)}
-                disabled={isLoading}
-                className={`px-3 py-1 rounded-full text-sm border transition-colors ${
-                  isSelected("place", p.value)
-                    ? "bg-primary text-white border-primary"
-                    : "bg-light text-primary border-primary-light hover:bg-primary-light"
-                } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
-              >
-                {p.label}
-              </button>
-            ))}
+        {/* Scrollable content area */}
+        <div className="overflow-y-auto pr-1 flex-1">
+          {/* Place */}
+          <div className="mb-4">
+            <h3 className="text-sm font-medium text-gray mb-2">
+              Place {selected.place.length > 0 && `(${selected.place.length})`}
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {filterOptions.place.map((p) => (
+                <button
+                  key={p.value}
+                  onClick={() => toggle("place", p)}
+                  disabled={isLoading}
+                  className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+                    isSelected("place", p.value)
+                      ? "bg-primary text-white border-primary"
+                      : "bg-light text-primary border-primary-light hover:bg-primary-light"
+                  } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Type */}
-        <div className="mb-4">
-          <h3 className="text-sm font-medium text-gray mb-2">
-            Type {selected.type.length > 0 && `(${selected.type.length})`}
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {filterOptions.type.map((t) => (
-              <button
-                key={t.value}
-                onClick={() => toggle("type", t)}
-                disabled={isLoading}
-                className={`px-3 py-1 rounded-full text-sm border transition-colors ${
-                  isSelected("type", t.value)
-                    ? "bg-primary text-white border-primary"
-                    : "bg-light text-primary border-primary-light hover:bg-primary-light"
-                } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
-              >
-                {t.label}
-              </button>
-            ))}
+          {/* Type */}
+          <div className="mb-4">
+            <h3 className="text-sm font-medium text-gray mb-2">
+              Type {selected.type.length > 0 && `(${selected.type.length})`}
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {filterOptions.type.map((t) => (
+                <button
+                  key={t.value}
+                  onClick={() => toggle("type", t)}
+                  disabled={isLoading}
+                  className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+                    isSelected("type", t.value)
+                      ? "bg-primary text-white border-primary"
+                      : "bg-light text-primary border-primary-light hover:bg-primary-light"
+                  } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Origin */}
-        <div className="mb-4">
-          <h3 className="text-sm font-medium text-gray mb-2">
-            Origin {selected.origin.length > 0 && `(${selected.origin.length})`}
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {filterOptions.origin.map((o) => (
-              <button
-                key={o.value}
-                onClick={() => toggle("origin", o)}
-                disabled={isLoading}
-                className={`px-3 py-1 rounded-full text-sm border transition-colors ${
-                  isSelected("origin", o.value)
-                    ? "bg-primary text-white border-primary"
-                    : "bg-light text-primary border-primary-light hover:bg-primary-light"
-                } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
-              >
-                {o.label}
-              </button>
-            ))}
+          {/* Origin */}
+          <div className="mb-4">
+            <h3 className="text-sm font-medium text-gray mb-2">
+              Origin{" "}
+              {selected.origin.length > 0 && `(${selected.origin.length})`}
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {filterOptions.origin.map((o) => (
+                <button
+                  key={o.value}
+                  onClick={() => toggle("origin", o)}
+                  disabled={isLoading}
+                  className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+                    isSelected("origin", o.value)
+                      ? "bg-primary text-white border-primary"
+                      : "bg-light text-primary border-primary-light hover:bg-primary-light"
+                  } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                >
+                  {o.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
         {/* Action buttons */}
-        <div className="flex justify-center items-center gap-4 mt-6">
+        <div className="flex justify-center items-center gap-4 mt-4 shrink-0">
           <button
             onClick={clearAll}
             disabled={isLoading || !hasSelections}
