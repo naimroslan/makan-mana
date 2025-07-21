@@ -1,5 +1,10 @@
 # 🍽️ Makan Mana
 
+![MIT License](https://img.shields.io/badge/license-MIT-green)
+![Made with Rsbuild](https://img.shields.io/badge/built%20with-rsbuild-blue)
+![Tailwind CSS](https://img.shields.io/badge/styled%20with-tailwindcss-06B6D4)
+![Dockerized](https://img.shields.io/badge/deployable%20with-docker-2496ED)
+
 Makan Mana is a web app designed to help people — especially workers around **Titiwangsa** — decide where to eat. If you're feeling indecisive, just **roll the dice** and let fate decide your next meal! 🎲
 
 ## 🚀 Features
