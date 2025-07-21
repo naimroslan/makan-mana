@@ -1,9 +1,10 @@
-const BASE_URL = process.env.MAKANMANA_API_URL;
+import { API } from "../constants/constants";
 
-export const API = {
-  FILTER_OPTIONS: `${BASE_URL}/restaurants/filter-options`,
-  FILTER: `${BASE_URL}/restaurants/filter`,
-  RESTAURANTS: `${BASE_URL}/restaurants`,
-  CHAT: `${BASE_URL}/chat`,
-  LOGIN: `${BASE_URL}/admin/login`,
+export const BACKEND = {
+  FILTER_OPTIONS: `${API.MAKANMANA.HOSTNAME}/restaurants/filter-options`,
+  FILTER: `${API.MAKANMANA.HOSTNAME}/restaurants/`,
+  RESTAURANTS: `${API.MAKANMANA.HOSTNAME}/restaurants`,
+  CHAT: `${API.MAKANMANA.HOSTNAME}/chat`,
+  LOGIN: `${API.MAKANMANA.HOSTNAME}/admin/login`,
+  ANNOUNCEMENT: `${API.MAKANMANA.HOSTNAME}/announcement`,
 };

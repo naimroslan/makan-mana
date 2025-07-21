@@ -8,7 +8,9 @@ import FilterModal from "../components/Modal/FilterModal";
 import GetLocationModal from "../components/Modal/GetLocationModal";
 import { buildFilterURL } from "../utils/filters";
 import { getSessionItem } from "../utils/session";
-import { API } from "../utils/api";
+import { BACKEND } from "../utils/api";
+import { supabase } from "../utils/supabase";
+import AnnouncementModal from "../components/Modal/AnnouncementModal";
 
 const ROLL_DURATION = 3;
 const VISIBLE_ITEM_HEIGHT = 60;
@@ -62,6 +64,47 @@ function App() {
   useEffect(() => {
     const loc = sessionStorage.getItem("makanmana_user_loc");
     setHasUserLocation(!!loc);
+  }, []);
+
+  useEffect(() => {
+    const getUserTier = async () => {
+      const token = localStorage.getItem("access_token");
+      if (!token) return;
+
+      const res = await fetch(BACKEND.USER_TIER, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const json = await res.json();
+      localStorage.setItem("user_tier", json.tier);
+    };
+
+    getUserTier();
+  }, []);
+
+  useEffect(() => {
+    const getSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+
+      if (token) {
+        localStorage.setItem("access_token", token);
+      }
+    };
+
+    getSession();
+
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        const token = session?.access_token;
+        if (token) localStorage.setItem("access_token", token);
+        else localStorage.removeItem("access_token");
+      },
+    );
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
   const extractFilterOptions = (
@@ -140,7 +183,7 @@ function App() {
   useEffect(() => {
     const fetchRestaurants = async () => {
       try {
-        const res = await fetch(API.RESTAURANTS);
+        const res = await fetch(BACKEND.RESTAURANTS);
         const json = await res.json();
 
         if (json.data && Array.isArray(json.data)) {
@@ -217,7 +260,7 @@ function App() {
 
     try {
       const params = buildFilterURL(selectedFilters);
-      const url = `${process.env.MAKANMANA_API_URL}${params}`;
+      const url = `${BACKEND.FILTER}${params}`;
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 
@@ -251,23 +294,13 @@ function App() {
     ) {
       try {
         setIsFilterOptionsLoading(true);
-        const res = await fetch(API.FILTER_OPTIONS);
+        const res = await fetch(BACKEND.FILTER_OPTIONS);
         const data = await res.json();
 
         setFilterOptions({
-          place: [
-            { label: "Nearby", value: "nearby" }, // ensure value lowercase for backend
-            { label: "Sunway Putra Mall", value: "sunway-putra-mall" },
-            { label: "TRX Mall", value: "trx-mall" },
-          ],
-          type: data.type.map((item: string) => ({
-            label: item,
-            value: item.toLowerCase(),
-          })),
-          origin: data.origin.map((item: string) => ({
-            label: item,
-            value: item.toLowerCase(),
-          })),
+          place: [{ label: "Nearby", value: "nearby" }, ...data.place],
+          type: data.type,
+          origin: data.origin,
         });
       } catch (err) {
         console.error("Failed to load filter options:", err);
@@ -291,6 +324,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-light flex flex-col">
+      <AnnouncementModal />
       <main className="flex-1 px-4 pt-6 pb-24 overflow-auto">
         <div className="w-full max-w-md mx-auto space-y-6">
           <div>
