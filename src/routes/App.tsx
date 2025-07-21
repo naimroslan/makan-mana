@@ -29,6 +29,7 @@ interface FilterOption {
 }
 
 interface FilterOptions {
+  city: FilterOption[];
   place: FilterOption[];
   type: FilterOption[];
   origin: FilterOption[];
@@ -45,6 +46,7 @@ function App() {
   const [originalRestaurants, setOriginalRestaurants] = useState<string[]>([]);
   const [restaurantData, setRestaurantData] = useState<RestaurantData>({});
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
+    city: [],
     place: [],
     type: [],
     origin: [],
@@ -255,19 +257,10 @@ function App() {
         const data = await res.json();
 
         setFilterOptions({
-          place: [
-            { label: "Nearby", value: "nearby" }, // ensure value lowercase for backend
-            { label: "Sunway Putra Mall", value: "sunway-putra-mall" },
-            { label: "TRX Mall", value: "trx-mall" },
-          ],
-          type: data.type.map((item: string) => ({
-            label: item,
-            value: item.toLowerCase(),
-          })),
-          origin: data.origin.map((item: string) => ({
-            label: item,
-            value: item.toLowerCase(),
-          })),
+          place: [{ label: "Nearby", value: "nearby" }, ...(data.place ?? [])],
+          type: data.type ?? [],
+          origin: data.origin ?? [],
+          city: data.city ?? [],
         });
       } catch (err) {
         console.error("Failed to load filter options:", err);
