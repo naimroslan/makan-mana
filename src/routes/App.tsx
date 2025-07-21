@@ -31,6 +31,7 @@ interface FilterOption {
 }
 
 interface FilterOptions {
+  city: FilterOption[];
   place: FilterOption[];
   type: FilterOption[];
   origin: FilterOption[];
@@ -47,6 +48,7 @@ function App() {
   const [originalRestaurants, setOriginalRestaurants] = useState<string[]>([]);
   const [restaurantData, setRestaurantData] = useState<RestaurantData>({});
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
+    city: [],
     place: [],
     type: [],
     origin: [],
