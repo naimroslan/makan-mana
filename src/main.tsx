@@ -7,6 +7,8 @@ import Chat from "./routes/Chat";
 import About from "./routes/About";
 
 import "./index.css";
+import Login from "./routes/auth/login";
+import Admin from "./routes/auth/admin";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -15,6 +17,8 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/" element={<App />} />
         <Route path="/chat" element={<Chat />} />
         <Route path="/about" element={<About />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/admin" element={<Admin />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,

@@ -9,11 +9,13 @@ interface FilterModalProps {
   isOpen: boolean;
   onClose: () => void;
   onApply: (filters: {
+    city: FilterOption[];
     place: FilterOption[];
     type: FilterOption[];
     origin: FilterOption[];
   }) => void;
   filterOptions: {
+    city: FilterOption[];
     place: FilterOption[];
     type: FilterOption[];
     origin: FilterOption[];
@@ -29,14 +31,18 @@ function FilterModal({
   isLoading = false,
 }: FilterModalProps) {
   const [selected, setSelected] = useState<{
+    city: FilterOption[];
     place: FilterOption[];
     type: FilterOption[];
     origin: FilterOption[];
-  }>({ place: [], type: [], origin: [] });
+  }>({ city: [], place: [], type: [], origin: [] });
 
   const modalRef = useRef<HTMLDivElement>(null);
 
-  const toggle = (key: "place" | "type" | "origin", option: FilterOption) => {
+  const toggle = (
+    key: "city" | "place" | "type" | "origin",
+    option: FilterOption,
+  ) => {
     setSelected((prev) => {
       const exists = prev[key].some((item) => item.value === option.value);
       return {
@@ -50,12 +56,12 @@ function FilterModal({
 
   const handleApply = () => {
     onApply(selected);
-    setSelected({ place: [], type: [], origin: [] });
+    setSelected({ city: [], place: [], type: [], origin: [] });
     onClose();
   };
 
   const clearAll = () => {
-    setSelected({ place: [], type: [], origin: [] });
+    setSelected({ city: [], place: [], type: [], origin: [] });
   };
 
   useEffect(() => {
@@ -75,12 +81,15 @@ function FilterModal({
   if (!isOpen) return null;
 
   const hasSelections =
+    selected.city.length > 0 ||
     selected.place.length > 0 ||
     selected.type.length > 0 ||
     selected.origin.length > 0;
 
-  const isSelected = (key: "place" | "type" | "origin", value: string) =>
-    selected[key].some((item) => item.value === value);
+  const isSelected = (
+    key: "city" | "place" | "type" | "origin",
+    value: string,
+  ) => selected[key].some((item) => item.value === value);
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex justify-center items-center p-4">
@@ -97,6 +106,29 @@ function FilterModal({
           >
             ×
           </button>
+        </div>
+
+        {/* City */}
+        <div className="mb-4">
+          <h3 className="text-sm font-medium text-gray mb-2">
+            City {selected.city.length > 0 && `(${selected.city.length})`}
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {filterOptions.city.map((c) => (
+              <button
+                key={c.value}
+                onClick={() => toggle("city", c)}
+                disabled={isLoading}
+                className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+                  isSelected("city", c.value)
+                    ? "bg-primary text-white border-primary"
+                    : "bg-light text-primary border-primary-light hover:bg-primary-light"
+                } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+              >
+                {c.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Place */}

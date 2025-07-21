@@ -177,7 +177,7 @@ function Chat() {
             {messages.map((msg, index) => (
               <div
                 key={index}
-                className={`max-w-[85%] p-3 text-[15px] leading-relaxed rounded-2xl ${
+                className={`max-w-[85%] p-3 text-[15px] leading-relaxed rounded-2xl whitespace-pre-line ${
                   msg.isUser
                     ? "bg-secondary text-white ml-auto rounded-br-md"
                     : "bg-primary text-light rounded-bl-md shadow-sm border border-border"
