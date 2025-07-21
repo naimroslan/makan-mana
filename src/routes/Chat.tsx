@@ -4,6 +4,9 @@ import { RiSendPlaneLine, RiArrowLeftLine } from "react-icons/ri";
 import { gsap } from "gsap";
 import { getSessionItem, setSessionItem } from "../utils/session";
 import { v4 as uuidv4 } from "uuid";
+import { BACKEND } from "../utils/api";
+import SignInModal from "../components/Modal/SignInModal";
+import { SignInUseCases } from "../constants/signInUseCases";
 
 interface Message {
   text: string;
@@ -18,6 +21,10 @@ function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState(initialQuery);
   const [isTyping, setIsTyping] = useState(false);
+  const [signInModalInfo, setSignInModalInfo] = useState<{
+    open: boolean;
+    reason: keyof typeof SignInUseCases;
+  }>({ open: false, reason: "NOT_SIGNED_IN" });
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const purpleBlobRef = useRef<HTMLDivElement>(null);
   const blueBlobRef = useRef<HTMLDivElement>(null);
@@ -102,9 +109,19 @@ function Chat() {
 
     try {
       const sessionId = getSessionItem("chat_session_id");
-      const res = await fetch(`${process.env.MAKANMANA_API_URL}/chat`, {
+      const token = localStorage.getItem("access_token");
+
+      if (!token) {
+        setSignInModalInfo({ open: true, reason: "NOT_SIGNED_IN" });
+        return;
+      }
+
+      const res = await fetch(BACKEND.CHAT, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ query: trimmed, sessionId }),
       });
 
@@ -224,6 +241,13 @@ function Chat() {
           </div>
         </div>
       </div>
+
+      <SignInModal
+        isOpen={signInModalInfo.open}
+        onClose={() => setSignInModalInfo({ ...signInModalInfo, open: false })}
+        title={SignInUseCases[signInModalInfo.reason].title}
+        message={SignInUseCases[signInModalInfo.reason].message}
+      />
     </div>
   );
 }
