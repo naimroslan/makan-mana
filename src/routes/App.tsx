@@ -1,186 +1,62 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { RiFilter3Fill, RiMapPinLine, RiSearchFill } from "react-icons/ri";
 import { gsap } from "gsap";
 
 import Navbar from "../components/Menu/Navbar";
 import FilterModal from "../components/Modal/FilterModal";
 import GetLocationModal from "../components/Modal/GetLocationModal";
+import AnnouncementModal from "../components/Modal/AnnouncementModal";
+
+import FiltersHeader from "../components/App/FiltersHeader";
+import RestaurantRoller from "../components/App/RestaurantRoller";
+import SearchBar from "../components/App/SearchBar";
+
+import { useSupabaseToken } from "../hooks/useSupabaseToken";
+import { useUserTier } from "../hooks/useUserTier";
+import {
+  extractFilterOptions,
+  FilterOptions,
+} from "../utils/extractFilterOptions";
 import { buildFilterURL } from "../utils/filters";
 import { getSessionItem } from "../utils/session";
 import { BACKEND } from "../utils/api";
-import { supabase } from "../utils/supabase";
-import AnnouncementModal from "../components/Modal/AnnouncementModal";
 
 const ROLL_DURATION = 3;
 const VISIBLE_ITEM_HEIGHT = 60;
 
-interface Restaurant {
-  name: string;
-  type: string[];
-  origin?: string[];
-}
-
-interface RestaurantData {
-  [location: string]: Restaurant[];
-}
-
-interface FilterOption {
-  label: string; // Display to user (e.g., 'Sunway Putra Mall')
-  value: string; // Sent to backend (e.g., 'sunway putra mall')
-}
-
-interface FilterOptions {
-  city: FilterOption[];
-  place: FilterOption[];
-  type: FilterOption[];
-  origin: FilterOption[];
-}
-
 function App() {
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isRolling, setIsRolling] = useState(false);
+
+  const [restaurants, setRestaurants] = useState<string[]>([]);
+  const [originalRestaurants, setOriginalRestaurants] = useState<string[]>([]);
   const [selectedRestaurant, setSelectedRestaurant] = useState<string | null>(
     null,
   );
-  const [restaurants, setRestaurants] = useState<string[]>([]);
-  const [originalRestaurants, setOriginalRestaurants] = useState<string[]>([]);
-  const [restaurantData, setRestaurantData] = useState<RestaurantData>({});
+  const [search, setSearch] = useState("");
+  const [isRolling, setIsRolling] = useState(false);
+
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
-    city: [],
     place: [],
     type: [],
     origin: [],
   });
-  const [search, setSearch] = useState("");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [isFilterLoading, setIsFilterLoading] = useState(false);
   const [isFilterOptionsLoading, setIsFilterOptionsLoading] = useState(false);
+  const [isFilterLoading, setIsFilterLoading] = useState(false);
   const [hasActiveFilters, setHasActiveFilters] = useState(false);
-  const [showLocationModal, setShowLocationModal] = useState(false);
+
   const [hasUserLocation, setHasUserLocation] = useState(false);
-  const [pendingNearbyFilter, setPendingNearbyFilter] =
-    useState<FilterOptions | null>(null);
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [pendingNearbyFilter, setPendingNearbyFilter] = useState<any>(null);
+
+  useSupabaseToken();
+  useUserTier();
 
   useEffect(() => {
     const loc = sessionStorage.getItem("makanmana_user_loc");
     setHasUserLocation(!!loc);
   }, []);
-
-  useEffect(() => {
-    const getUserTier = async () => {
-      const token = localStorage.getItem("access_token");
-      if (!token) return;
-
-      const res = await fetch(BACKEND.USER_TIER, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const json = await res.json();
-      localStorage.setItem("user_tier", json.tier);
-    };
-
-    getUserTier();
-  }, []);
-
-  useEffect(() => {
-    const getSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      const token = data.session?.access_token;
-
-      if (token) {
-        localStorage.setItem("access_token", token);
-      }
-    };
-
-    getSession();
-
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        const token = session?.access_token;
-        if (token) localStorage.setItem("access_token", token);
-        else localStorage.removeItem("access_token");
-      },
-    );
-
-    return () => {
-      listener.subscription.unsubscribe();
-    };
-  }, []);
-
-  const extractFilterOptions = (
-    data: RestaurantData | Restaurant[],
-  ): FilterOptions => {
-    const placeSet = new Set<string>();
-    const typeSet = new Set<string>();
-    const originSet = new Set<string>();
-
-    if (Array.isArray(data)) {
-      data.forEach((restaurant) => {
-        if ("location" in restaurant && restaurant.location) {
-          placeSet.add(restaurant.location);
-        }
-        restaurant.type?.forEach((c) => typeSet.add(c));
-        restaurant.origin?.forEach((o) => originSet.add(o));
-      });
-    } else {
-      Object.entries(data).forEach(([place, restaurants]) => {
-        placeSet.add(place);
-        restaurants.forEach((restaurant) => {
-          restaurant.type?.forEach((c) => typeSet.add(c));
-          restaurant.origin?.forEach((o) => originSet.add(o));
-        });
-      });
-    }
-
-    const toFilterOption = (item: string): FilterOption => ({
-      label: item,
-      value: item.toLowerCase(), // ensure value is lowercase for backend
-    });
-
-    return {
-      place: Array.from(placeSet).map(toFilterOption),
-      type: Array.from(typeSet).map(toFilterOption),
-      origin: Array.from(originSet).map(toFilterOption),
-    };
-  };
-
-  const getAllRestaurantNames = (data: RestaurantData): string[] => {
-    return Object.values(data)
-      .flat()
-      .map((r) => r.name);
-  };
-
-  // ✅ Only request location when user clicks
-  const handleGetLocation = () => {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const rounded = (num: number) => Number(num.toFixed(5));
-        const { latitude, longitude } = position.coords;
-        const locationData = {
-          latitude: rounded(latitude),
-          longitude: rounded(longitude),
-        };
-        sessionStorage.setItem(
-          "makanmana_user_loc",
-          JSON.stringify(locationData),
-        );
-        setHasUserLocation(true);
-        setShowLocationModal(false);
-
-        if (pendingNearbyFilter) {
-          handleApplyFilter(pendingNearbyFilter);
-          setPendingNearbyFilter(null);
-        }
-      },
-      (error) => {
-        console.error("Location access denied or error:", error);
-        alert("Unable to get your location. Please enable location access.");
-        setPendingNearbyFilter(null);
-      },
-    );
-  };
 
   useEffect(() => {
     const fetchRestaurants = async () => {
@@ -192,10 +68,11 @@ function App() {
           setRestaurants(json.data);
           setOriginalRestaurants(json.data);
         } else {
-          const restaurantNames = getAllRestaurantNames(json);
-          setRestaurantData(json);
-          setRestaurants(restaurantNames);
-          setOriginalRestaurants(restaurantNames);
+          const names = Object.values(json)
+            .flat()
+            .map((r) => r.name);
+          setRestaurants(names);
+          setOriginalRestaurants(names);
           setFilterOptions(extractFilterOptions(json));
         }
       } catch (err) {
@@ -207,8 +84,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (!containerRef.current) return;
-    gsap.set(containerRef.current, { y: 0 });
+    if (containerRef.current) gsap.set(containerRef.current, { y: 0 });
   }, [restaurants.length]);
 
   const rollRestaurants = useCallback(() => {
@@ -235,53 +111,62 @@ function App() {
   }, [isRolling, restaurants]);
 
   const onSearch = () => {
-    const trimmed = search.trim();
-    if (!trimmed) return;
-    navigate("/chat", { state: { query: trimmed } });
+    if (search.trim()) navigate("/chat", { state: { query: search.trim() } });
   };
 
-  const handleRestaurantClick = (restaurantName: string) => {
-    navigate("/chat", { state: { query: restaurantName } });
+  const handleRestaurantClick = (name: string) => {
+    navigate("/chat", { state: { query: name } });
   };
 
-  const handleApplyFilter = async (selectedFilters: FilterOptions) => {
-    const isNearby = selectedFilters.place.some((p) => p.value === "nearby");
+  const handleGetLocation = () => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        sessionStorage.setItem(
+          "makanmana_user_loc",
+          JSON.stringify({
+            latitude: +latitude.toFixed(5),
+            longitude: +longitude.toFixed(5),
+          }),
+        );
+        setHasUserLocation(true);
+        setShowLocationModal(false);
 
-    if (isNearby) {
-      const location = getSessionItem<{ latitude: number; longitude: number }>(
-        "makanmana_user_loc",
-      );
-      if (!location) {
-        setPendingNearbyFilter(selectedFilters);
-        setShowLocationModal(true);
-        return;
-      }
+        if (pendingNearbyFilter) {
+          handleApplyFilter(pendingNearbyFilter);
+          setPendingNearbyFilter(null);
+        }
+      },
+      (err) => {
+        alert("Unable to get location. Please enable access.");
+        setPendingNearbyFilter(null);
+        console.error(err);
+      },
+    );
+  };
+
+  const handleApplyFilter = async (filters: any) => {
+    const isNearby = filters.place.some((p: any) => p.value === "nearby");
+
+    if (isNearby && !getSessionItem("makanmana_user_loc")) {
+      setPendingNearbyFilter(filters);
+      setShowLocationModal(true);
+      return;
     }
 
     setIsFilterLoading(true);
-
     try {
-      const params = buildFilterURL(selectedFilters);
-      const url = `${BACKEND.FILTER}${params}`;
+      const url = `${BACKEND.FILTER}${buildFilterURL(filters)}`;
       const res = await fetch(url);
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-
-      const filteredData = await res.json(); // this is grouped by location
-      console.log("Filtered API response:", filteredData);
-      const restaurantNames: string[] = Object.values(filteredData)
-        .flat()
-        .filter(Boolean); // assumes flat list of strings
-
-      setRestaurants(restaurantNames); // <- ensures rolling section works
+      const json = await res.json();
+      const names = Object.values(json).flat().filter(Boolean);
+      setRestaurants(names);
       setSelectedRestaurant(null);
       setHasActiveFilters(true);
-
-      if (containerRef.current) {
-        gsap.set(containerRef.current, { y: 0 });
-      }
+      if (containerRef.current) gsap.set(containerRef.current, { y: 0 });
     } catch (err) {
       console.error("Filter fetch error:", err);
-      alert("Failed to filter restaurants. Please try again.");
+      alert("Failed to filter. Try again.");
     } finally {
       setIsFilterLoading(false);
       setIsFilterOpen(false);
@@ -289,24 +174,18 @@ function App() {
   };
 
   const openFilterModal = async () => {
-    if (
-      filterOptions.place.length === 0 &&
-      filterOptions.type.length === 0 &&
-      filterOptions.origin.length === 0
-    ) {
+    if (filterOptions.place.length === 0) {
+      setIsFilterOptionsLoading(true);
       try {
-        setIsFilterOptionsLoading(true);
         const res = await fetch(BACKEND.FILTER_OPTIONS);
         const data = await res.json();
-
         setFilterOptions({
           place: [{ label: "Nearby", value: "nearby" }, ...data.place],
           type: data.type,
           origin: data.origin,
         });
-      } catch (err) {
-        console.error("Failed to load filter options:", err);
-        alert("Failed to load filter options. Please try again.");
+      } catch {
+        alert("Failed to load filter options.");
       } finally {
         setIsFilterOptionsLoading(false);
       }
@@ -318,125 +197,43 @@ function App() {
     setRestaurants(originalRestaurants);
     setSelectedRestaurant(null);
     setHasActiveFilters(false);
-
-    if (containerRef.current) {
-      gsap.set(containerRef.current, { y: 0 });
-    }
+    if (containerRef.current) gsap.set(containerRef.current, { y: 0 });
   };
 
   return (
     <div className="min-h-screen bg-light flex flex-col">
-      <AnnouncementModal />
+      {/* <AnnouncementModal /> */}
       <main className="flex-1 px-4 pt-6 pb-24 overflow-auto">
         <div className="w-full max-w-md mx-auto space-y-6">
-          <div>
-            <h2 className="text-primary text-xl font-semibold mb-2">
-              Ask Me Anything
-            </h2>
-            <div className="flex items-center bg-primary-light rounded-full p-2">
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && onSearch()}
-                className="flex-1 bg-transparent focus:outline-none text-primary px-2 font-funnel font-semibold"
-                placeholder="What you feel like eating?"
-              />
-              <button
-                onClick={onSearch}
-                disabled={!search.trim()}
-                className="bg-light px-5 py-3 rounded-full text-primary text-xl font-bold disabled:opacity-50"
-              >
-                <RiSearchFill />
-              </button>
+          <SearchBar value={search} onChange={setSearch} onSearch={onSearch} />
+
+          <FiltersHeader
+            hasActiveFilters={hasActiveFilters}
+            restaurantCount={restaurants.length}
+            showLocationButton={!hasUserLocation}
+            onReset={resetFilters}
+            onOpenFilters={openFilterModal}
+            onRequestLocation={() => setShowLocationModal(true)}
+          />
+
+          <RestaurantRoller
+            restaurants={restaurants}
+            selectedRestaurant={selectedRestaurant}
+            containerRef={containerRef}
+            onClick={handleRestaurantClick}
+          />
+
+          {selectedRestaurant && !isRolling && (
+            <div className="p-4 bg-light text-center">
+              <p className="text-gray">
+                Makan{" "}
+                <span className="font-bold text-primary">
+                  {selectedRestaurant}
+                </span>{" "}
+                jom!
+              </p>
             </div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1">
-              <h2 className="text-primary text-xl font-semibold">
-                Today's Pick
-              </h2>
-              {hasActiveFilters && (
-                <span className="text-sm font-normal text-gray">
-                  ({restaurants.length} filtered)
-                </span>
-              )}
-              {!hasUserLocation && (
-                <button
-                  onClick={() => setShowLocationModal(true)}
-                  className="p-1 transition-colors text-gray hover:text-primary"
-                >
-                  <RiMapPinLine className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-
-            <div className="flex items-center gap-2">
-              {hasActiveFilters && (
-                <button
-                  onClick={resetFilters}
-                  className="text-sm text-primary underline hover:text-primary/80"
-                >
-                  Reset
-                </button>
-              )}
-              <button
-                onClick={openFilterModal}
-                className={`p-1 transition-colors ${hasActiveFilters ? "text-primary" : "text-gray"}`}
-              >
-                <RiFilter3Fill className="w-6 h-6" />
-              </button>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl overflow-hidden border border-border">
-            <div className="relative h-[180px] overflow-hidden">
-              <div className="absolute inset-x-0 top-0 h-[60px] bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
-              <div className="absolute inset-x-0 bottom-0 h-[60px] bg-gradient-to-t from-white to-transparent z-10 pointer-events-none" />
-              <div
-                ref={containerRef}
-                className="absolute top-[60px] inset-x-0 transition-all"
-              >
-                {restaurants.map((name, i) => {
-                  const isSelected = name === selectedRestaurant;
-                  return (
-                    <div
-                      key={name + i}
-                      onClick={() => handleRestaurantClick(name)}
-                      className={`h-[60px] flex items-center justify-center text-xl font-semibold transition-opacity cursor-pointer ${
-                        isSelected
-                          ? "text-primary opacity-100"
-                          : "text-gray opacity-30"
-                      }`}
-                    >
-                      {name}
-                    </div>
-                  );
-                })}
-
-                {restaurants.length === 0 && (
-                  <div className="h-[60px] flex items-center justify-center text-gray text-lg">
-                    {hasActiveFilters
-                      ? "No restaurants match your filters"
-                      : "Loading restaurants..."}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {selectedRestaurant && !isRolling && (
-              <div className="p-4 bg-light text-center">
-                <p className="text-gray">
-                  Makan{" "}
-                  <span className="font-bold text-primary">
-                    {selectedRestaurant}
-                  </span>{" "}
-                  jom!
-                </p>
-              </div>
-            )}
-          </div>
+          )}
 
           <button
             onClick={rollRestaurants}
@@ -458,14 +255,14 @@ function App() {
         </div>
       </main>
 
-      <Navbar className="fixed bottom-0 left-0 right-0 z-50" />
+      <Navbar />
 
       <FilterModal
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
         onApply={handleApplyFilter}
         filterOptions={filterOptions}
-        isLoading={isFilterOptionsLoading} // ✅ Pass this if your FilterModal handles loading UI
+        isLoading={isFilterOptionsLoading}
       />
 
       {showLocationModal && (
