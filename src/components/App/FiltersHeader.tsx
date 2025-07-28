@@ -47,7 +47,9 @@ export default function FiltersHeader({
         )}
         <button
           onClick={onOpenFilters}
-          className={`p-1 transition-colors ${hasActiveFilters ? "text-primary" : "text-gray"}`}
+          className={`p-1 transition-colors ${
+            hasActiveFilters ? "text-primary" : "text-gray"
+          }`}
         >
           <RiFilter3Fill className="w-6 h-6" />
         </button>

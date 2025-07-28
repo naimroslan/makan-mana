@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { gsap } from "gsap";
 
 import Navbar from "../components/Menu/Navbar";
-import FilterModal from "../components/Modal/FilterModal";
-import GetLocationModal from "../components/Modal/GetLocationModal";
-import AnnouncementModal from "../components/Modal/AnnouncementModal";
+import FilterDialog from "../components/Modal/Filter/FilterDialog";
+import GetLocationModal from "../components/Modal/GetLocation/GetLocationModal";
+// import AnnouncementModal from "../components/Modal/Announcement/AnnouncementModal";
 
 import FiltersHeader from "../components/App/FiltersHeader";
 import RestaurantRoller from "../components/App/RestaurantRoller";
@@ -213,7 +213,7 @@ function App() {
             showLocationButton={!hasUserLocation}
             onReset={resetFilters}
             onOpenFilters={openFilterModal}
-            onRequestLocation={() => setShowLocationModal(true)}
+            onRequestLocation={handleGetLocation}
           />
 
           <RestaurantRoller
@@ -257,21 +257,13 @@ function App() {
 
       <Navbar />
 
-      <FilterModal
+      <FilterDialog
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
         onApply={handleApplyFilter}
         filterOptions={filterOptions}
         isLoading={isFilterOptionsLoading}
       />
-
-      {showLocationModal && (
-        <GetLocationModal
-          onAllow={() => setShowLocationModal(false)}
-          onClose={() => setShowLocationModal(false)}
-          onRequestLocation={handleGetLocation}
-        />
-      )}
     </div>
   );
 }
