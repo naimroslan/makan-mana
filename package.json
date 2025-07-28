@@ -11,6 +11,8 @@
     "start": "rsbuild preview --host 0.0.0.0 --port 3002"
   },
   "dependencies": {
+    "@dicebear/collection": "^9.2.3",
+    "@dicebear/core": "^9.2.3",
     "@supabase/supabase-js": "^2.51.0",
     "dotenv": "^16.4.7",
     "gsap": "^3.12.5",
