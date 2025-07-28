@@ -18,13 +18,12 @@ interface FilterContentProps {
   onClose: () => void;
   selected: Record<string, FilterOption[]>;
   setSelected: (selected: Record<string, FilterOption[]>) => void;
+  onClear?: () => void;
 }
 
 export default function FilterContent({
-  onApply,
   filterOptions,
   isLoading = false,
-  onClose,
   selected,
   setSelected,
 }: FilterContentProps) {
@@ -45,7 +44,7 @@ export default function FilterContent({
     options: FilterOption[],
   ) => (
     <div className="mb-4">
-      <h3 className="text-sm font-medium text-gray mb-2">
+      <h3 className="text-sm font-medium text-text mb-2">
         {key[0].toUpperCase() + key.slice(1)}
         {selected[key].length > 0 ? ` (${selected[key].length})` : ""}
       </h3>

@@ -31,14 +31,14 @@ function Navbar() {
               key={id}
               className="flex flex-col items-center text-xs transition-colors"
             >
-              <div className="w-10 h-10 flex items-center justify-center mb-1">
+              <div className="w-10 h-10 flex items-center justify-center">
                 <Icon
                   size={24}
-                  className={isActive ? "text-primary" : "text-text"}
+                  className={isActive ? "text-secondary" : "text-text"}
                 />
               </div>
               <span
-                className={`text-[11px] ${isActive ? "text-primary" : "text-text"}`}
+                className={`text-[11px] ${isActive ? "text-secondary" : "text-text"}`}
               >
                 {label}
               </span>

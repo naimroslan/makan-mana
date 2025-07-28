@@ -11,7 +11,7 @@ export default function SearchBar({
 }) {
   return (
     <div>
-      <div className="flex items-center bg-primary-light rounded-full p-2">
+      <div className="flex items-center bg-white rounded-full p-2">
         <input
           type="text"
           value={value}

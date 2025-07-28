@@ -34,7 +34,6 @@ export default function BottomSheet({
 
   useEffect(() => {
     if (isOpen) {
-      // Kill any existing animations first
       gsap.killTweensOf([sheetRef.current, backdropRef.current]);
       setCanClose(false);
 
@@ -66,13 +65,14 @@ export default function BottomSheet({
   if (!isOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-50">
+    <div className="fixed inset-0 z-50 overflow-hidden">
       {/* Backdrop */}
       <div
         ref={backdropRef}
         className="absolute inset-0 bg-black/30 backdrop-blur-sm"
         onClick={canClose ? onClose : undefined}
       />
+
       {/* Sheet */}
       <div
         ref={sheetRef}
@@ -81,22 +81,33 @@ export default function BottomSheet({
       >
         {/* Handle */}
         <div className="h-1.5 w-10 bg-gray-300 rounded-full mx-auto mb-4" />
+
         {/* Scrollable content */}
         <div
           className={`overflow-y-auto grow ${
-            withButton && floatingButton ? "pb-20" : "pb-6"
+            withButton && floatingButton ? "pb-24" : "pb-6"
           }`}
         >
           {children}
         </div>
+
         {/* Button */}
-        {withButton && (
+        {withButton && buttonContent && (
           <div
-            className={`w-full px-4 ${
-              floatingButton ? "absolute bottom-6 left-0" : "mt-4"
+            className={`${
+              floatingButton ? "absolute inset-x-4 bottom-6" : "mt-4 px-4"
             }`}
           >
-            {buttonContent}
+            <button
+              className="w-full py-3 rounded-xl bg-primary text-white font-semibold"
+              onClick={
+                typeof buttonContent === "object" && "props" in buttonContent
+                  ? buttonContent.props?.onClick
+                  : undefined
+              }
+            >
+              {buttonContent}
+            </button>
           </div>
         )}
       </div>
