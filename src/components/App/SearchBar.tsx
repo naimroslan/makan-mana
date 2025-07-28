@@ -1,4 +1,4 @@
-import { RiSearchFill } from "react-icons/ri";
+import { FaWandMagicSparkles } from "react-icons/fa6";
 
 export default function SearchBar({
   value,
@@ -26,9 +26,9 @@ export default function SearchBar({
         <button
           onClick={onSearch}
           disabled={!value.trim()}
-          className="bg-light px-5 py-3 rounded-full text-primary text-xl font-bold disabled:opacity-50"
+          className="px-5 py-3 text-secondary text-xl font-bold disabled:opacity-50"
         >
-          <RiSearchFill />
+          <FaWandMagicSparkles />
         </button>
       </div>
     </div>
