@@ -1,7 +1,7 @@
 import { useState } from "react";
-import useIsMobile from "../../../hooks/useIsMobile";
-import BottomSheet from "../../BottomSheet/BottomSheet";
-import Modal from "../../Modal/Modal";
+import useIsMobile from "~/hooks/useIsMobile";
+import BottomSheet from "~/components/BottomSheet/BottomSheet";
+import Modal from "~/components/Modal/Modal";
 import FilterContent from "./FilterContent";
 
 interface FilterOption {
@@ -34,6 +34,7 @@ export default function FilterDialog({
 }: FilterDialogProps) {
   const isMobile = useIsMobile();
   const [selected, setSelected] = useState({
+    city: [],
     place: [],
     type: [],
     origin: [],
@@ -73,7 +74,7 @@ export default function FilterDialog({
           className={`w-1/2 py-2 rounded-full font-medium transition-colors shadow-md ${
             hasSelections && !isLoading
               ? "bg-primary text-white hover:bg-primary/90"
-              : "bg-muted text-gray cursor-not-allowed"
+              : "bg-muted text-white cursor-not-allowed"
           }`}
         >
           {isLoading ? "Applying..." : "Apply"}
@@ -99,7 +100,9 @@ export default function FilterDialog({
       isOpen={isOpen}
       onClose={onClose}
       withButton
-      buttonContent={buttonGroup}
+      buttonContent={
+        <span onClick={handleApply}>{isLoading ? "Applying..." : "Apply"}</span>
+      }
     >
       {content}
     </BottomSheet>

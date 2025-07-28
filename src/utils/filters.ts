@@ -16,7 +16,7 @@ export const buildFilterURL = (selectedFilters: {
     }
   }
 
-  selectedFilters.city.forEach((city) => params.append("city", city.value));
+  selectedFilters.city?.forEach((city) => params.append("city", city.value));
   selectedFilters.place
     .filter((p) => p.value !== "nearby")
     .forEach((p) => params.append("place", p.value));
