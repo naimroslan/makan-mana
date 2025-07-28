@@ -22,7 +22,7 @@ export default {
         danger: "#FF4C4C",
 
         dark: "#222222",
-        gray: "#6B7280",
+        text: "#6B7280",
       },
       borderRadius: {
         xl: "1rem",
