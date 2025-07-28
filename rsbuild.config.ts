@@ -1,6 +1,7 @@
 import { defineConfig } from "@rsbuild/core";
 import { pluginReact } from "@rsbuild/plugin-react";
 import dotenv from "dotenv";
+import path from "path";
 
 dotenv.config();
 
@@ -15,6 +16,9 @@ export default defineConfig({
   source: {
     entry: {
       index: "./src/main.tsx",
+    },
+    alias: {
+      "~": path.resolve(__dirname, "src"),
     },
     define: {
       "process.env.MAKANMANA_BACKEND_URL": JSON.stringify(API_URL),
