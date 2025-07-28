@@ -20,7 +20,7 @@ export default function FiltersHeader({
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-1">
-        <h2 className="text-primary text-xl font-semibold">Today's Pick</h2>
+        <h2 className="text-primary text-lg font-semibold">Today's Pick</h2>
         {hasActiveFilters && (
           <span className="text-sm font-normal text-gray">
             ({restaurantCount} filtered)

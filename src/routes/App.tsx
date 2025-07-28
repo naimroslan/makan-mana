@@ -2,24 +2,24 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { gsap } from "gsap";
 
-import Navbar from "../components/Menu/Navbar";
-import FilterDialog from "../components/Modal/Filter/FilterDialog";
-import GetLocationModal from "../components/Modal/GetLocation/GetLocationModal";
+import Header from "~/components/Menu/Header";
+import Navbar from "~/components/Menu/Navbar";
+import FilterDialog from "~/components/Modal/Filter/FilterDialog";
 // import AnnouncementModal from "../components/Modal/Announcement/AnnouncementModal";
 
-import FiltersHeader from "../components/App/FiltersHeader";
-import RestaurantRoller from "../components/App/RestaurantRoller";
-import SearchBar from "../components/App/SearchBar";
+import FiltersHeader from "~/components/App/FiltersHeader";
+import RestaurantRoller from "~/components/App/RestaurantRoller";
+import SearchBar from "~/components/App/SearchBar";
 
-import { useSupabaseToken } from "../hooks/useSupabaseToken";
-import { useUserTier } from "../hooks/useUserTier";
+import { useSupabaseToken } from "~/hooks/useSupabaseToken";
+import { useUserTier } from "~/hooks/useUserTier";
 import {
   extractFilterOptions,
   FilterOptions,
-} from "../utils/extractFilterOptions";
-import { buildFilterURL } from "../utils/filters";
-import { getSessionItem } from "../utils/session";
-import { BACKEND } from "../utils/api";
+} from "~/utils/extractFilterOptions";
+import { buildFilterURL } from "~/utils/filters";
+import { getSessionItem } from "~/utils/session";
+import { BACKEND } from "~/utils/api";
 
 const ROLL_DURATION = 3;
 const VISIBLE_ITEM_HEIGHT = 60;
@@ -205,6 +205,7 @@ function App() {
       {/* <AnnouncementModal /> */}
       <main className="flex-1 px-4 pt-6 pb-24 overflow-auto">
         <div className="w-full max-w-md mx-auto space-y-6">
+          <Header />
           <SearchBar value={search} onChange={setSearch} onSearch={onSearch} />
 
           <FiltersHeader
@@ -225,7 +226,7 @@ function App() {
 
           {selectedRestaurant && !isRolling && (
             <div className="p-4 bg-light text-center">
-              <p className="text-gray">
+              <p className="text-text">
                 Makan{" "}
                 <span className="font-bold text-primary">
                   {selectedRestaurant}

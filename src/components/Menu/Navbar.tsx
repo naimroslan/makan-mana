@@ -34,11 +34,11 @@ function Navbar() {
               <div className="w-10 h-10 flex items-center justify-center mb-1">
                 <Icon
                   size={24}
-                  className={isActive ? "text-primary" : "text-gray"}
+                  className={isActive ? "text-primary" : "text-text"}
                 />
               </div>
               <span
-                className={`text-[11px] ${isActive ? "text-primary" : "text-gray"}`}
+                className={`text-[11px] ${isActive ? "text-primary" : "text-text"}`}
               >
                 {label}
               </span>
