@@ -9,13 +9,17 @@ import About from "./routes/About";
 import "./index.css";
 import Login from "./routes/auth/login";
 import Admin from "./routes/auth/admin";
+import Lists from "./routes/Lists";
+import Map from "./routes/Map";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<App />} />
+        <Route path="/lists" element={<Lists />} />
         <Route path="/chat" element={<Chat />} />
+        <Route path="/map" element={<Map />} />
         <Route path="/about" element={<About />} />
         <Route path="/login" element={<Login />} />
         <Route path="/admin" element={<Admin />} />

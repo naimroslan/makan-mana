@@ -1,4 +1,10 @@
-import { RiBowlFill, RiChatAiFill, RiUserSmileFill } from "react-icons/ri";
+import {
+  RiHome6Fill,
+  RiChatAiFill,
+  RiUserSmileFill,
+  RiMap2Fill,
+  RiFileList3Fill,
+} from "react-icons/ri";
 import { useLocation, Link } from "react-router-dom";
 
 function Navbar() {
@@ -6,28 +12,39 @@ function Navbar() {
   const active = location.pathname;
 
   const navItems = [
-    { id: "/", icon: <RiBowlFill size={20} />, route: "/" },
-    { id: "/chat", icon: <RiChatAiFill size={20} />, route: "/chat" },
-    { id: "/about", icon: <RiUserSmileFill size={20} />, route: "/about" },
+    { id: "/", icon: RiHome6Fill, label: "Home" },
+    { id: "/lists", icon: RiFileList3Fill, label: "Lists" },
+    { id: "/chat", icon: RiChatAiFill, label: "AI" },
+    { id: "/map", icon: RiMap2Fill, label: "Map" },
+    { id: "/about", icon: RiUserSmileFill, label: "Profile" },
   ];
 
   return (
-    <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
-      <div className="flex items-center justify-between gap-6 px-4 py-2 bg-white/20 backdrop-blur-md border border-white/30 rounded-full shadow-lg">
-        {navItems.map(({ id, icon, route }) => (
-          <Link
-            to={route}
-            key={id}
-            className={`w-10 h-10 flex items-center justify-center rounded-full transition-all
-              ${
-                active === route
-                  ? "bg-primary text-white"
-                  : "text-primary hover:bg-white/10"
-              }`}
-          >
-            {icon}
-          </Link>
-        ))}
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white">
+      <div className="flex justify-around items-center py-2">
+        {navItems.map(({ id, icon: Icon, label }) => {
+          const isActive = active === id;
+
+          return (
+            <Link
+              to={id}
+              key={id}
+              className="flex flex-col items-center text-xs transition-colors"
+            >
+              <div className="w-10 h-10 flex items-center justify-center mb-1">
+                <Icon
+                  size={24}
+                  className={isActive ? "text-primary" : "text-gray"}
+                />
+              </div>
+              <span
+                className={`text-[11px] ${isActive ? "text-primary" : "text-gray"}`}
+              >
+                {label}
+              </span>
+            </Link>
+          );
+        })}
       </div>
     </nav>
   );
