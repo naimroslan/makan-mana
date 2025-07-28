@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { setLocalItem } from "../../utils/session";
+import { BACKEND } from "../../utils/api";
 
 export default function Login() {
   const [form, setForm] = useState({ username: "", password: "" });
@@ -12,7 +13,7 @@ export default function Login() {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:3000/login", {
+      const res = await fetch(BACKEND.LOGIN, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include", // important if you're using cookies
