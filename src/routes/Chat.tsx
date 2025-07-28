@@ -5,7 +5,7 @@ import { gsap } from "gsap";
 import { getSessionItem, setSessionItem } from "../utils/session";
 import { v4 as uuidv4 } from "uuid";
 import { BACKEND } from "../utils/api";
-import SignInModal from "../components/Modal/SignInModal";
+import SignInModal from "../components/Modal/SignIn/SignInDialog";
 import { SignInUseCases } from "../constants/signInUseCases";
 
 interface Message {
