@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { gsap } from "gsap";
 
 import Header from "~/components/Menu/Header";
-import Navbar from "~/components/Menu/Navbar";
 import FilterDialog from "~/components/Modal/Filter/FilterDialog";
 // import AnnouncementModal from "../components/Modal/Announcement/AnnouncementModal";
 
@@ -11,7 +10,6 @@ import FiltersHeader from "~/components/App/FiltersHeader";
 import RestaurantRoller from "~/components/App/RestaurantRoller";
 import SearchBar from "~/components/App/SearchBar";
 
-import { useSupabaseToken } from "~/hooks/useSupabaseToken";
 import { useUserTier } from "~/hooks/useUserTier";
 import {
   extractFilterOptions,
@@ -20,6 +18,7 @@ import {
 import { buildFilterURL } from "~/utils/filters";
 import { getSessionItem } from "~/utils/session";
 import { BACKEND } from "~/utils/api";
+import PlaceStatus from "~/components/App/PlaceStatus";
 
 const ROLL_DURATION = 3;
 const VISIBLE_ITEM_HEIGHT = 60;
@@ -50,7 +49,6 @@ function App() {
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [pendingNearbyFilter, setPendingNearbyFilter] = useState<any>(null);
 
-  useSupabaseToken();
   useUserTier();
 
   useEffect(() => {
@@ -84,7 +82,8 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (containerRef.current) gsap.set(containerRef.current, { y: 0 });
+    if (!containerRef.current) return;
+    gsap.set(containerRef.current, { y: 0 });
   }, [restaurants.length]);
 
   const rollRestaurants = useCallback(() => {
@@ -105,7 +104,10 @@ function App() {
         const idx = Math.floor(Math.random() * restaurants.length);
         setSelectedRestaurant(restaurants[idx]);
         setIsRolling(false);
-        gsap.set(containerRef.current, { y: -idx * itemHeight });
+        if (containerRef.current) {
+          // 🛠 null guard added
+          gsap.set(containerRef.current, { y: -idx * itemHeight });
+        }
       },
     });
   }, [isRolling, restaurants]);
@@ -217,12 +219,32 @@ function App() {
             onRequestLocation={handleGetLocation}
           />
 
-          <RestaurantRoller
-            restaurants={restaurants}
-            selectedRestaurant={selectedRestaurant}
-            containerRef={containerRef}
-            onClick={handleRestaurantClick}
-          />
+          <div className="relative">
+            <RestaurantRoller
+              restaurants={restaurants}
+              selectedRestaurant={selectedRestaurant}
+              containerRef={containerRef}
+              onClick={handleRestaurantClick}
+            />
+
+            <button
+              onClick={rollRestaurants}
+              disabled={isRolling || restaurants.length === 0}
+              className={`w-full py-4 px-6 rounded-b-xl text-white font-semibold text-xl transition-all ${
+                isRolling || restaurants.length === 0
+                  ? "bg-muted cursor-not-allowed"
+                  : "bg-primary active:scale-95 hover:bg-primary/90"
+              }`}
+            >
+              {isRolling
+                ? "Rolling..."
+                : restaurants.length === 0
+                  ? hasActiveFilters
+                    ? "No restaurants available"
+                    : "Loading..."
+                  : "Makan mana?"}
+            </button>
+          </div>
 
           {selectedRestaurant && !isRolling && (
             <div className="p-4 bg-light text-center">
@@ -233,30 +255,13 @@ function App() {
                 </span>{" "}
                 jom!
               </p>
+              <div className="mt-2 flex justify-center">
+                <PlaceStatus isOpen={true} />
+              </div>
             </div>
           )}
-
-          <button
-            onClick={rollRestaurants}
-            disabled={isRolling || restaurants.length === 0}
-            className={`w-full py-4 px-6 rounded-xl text-white font-semibold text-xl transition-all ${
-              isRolling || restaurants.length === 0
-                ? "bg-muted cursor-not-allowed"
-                : "bg-primary active:scale-95 hover:bg-primary/90"
-            }`}
-          >
-            {isRolling
-              ? "Rolling..."
-              : restaurants.length === 0
-                ? hasActiveFilters
-                  ? "No restaurants available"
-                  : "Loading..."
-                : "Makan mana?"}
-          </button>
         </div>
       </main>
-
-      <Navbar />
 
       <FilterDialog
         isOpen={isFilterOpen}
