@@ -10,6 +10,7 @@ const API_URL = process.env.MAKANMANA_BACKEND_URL;
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 const REACT_MAKANMANA_VERSION = process.env.REACT_MAKANMANA_VERSION;
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 
 export default defineConfig({
   plugins: [pluginReact()],
@@ -27,6 +28,7 @@ export default defineConfig({
       "process.env.REACT_MAKANMANA_VERSION": JSON.stringify(
         REACT_MAKANMANA_VERSION,
       ),
+      "process.env.GOOGLE_CLIENT_ID": JSON.stringify(GOOGLE_CLIENT_ID),
     },
   },
   html: {

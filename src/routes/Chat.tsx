@@ -61,6 +61,13 @@ function Chat() {
     animateBlob(blueBlobRef, 60, 14, true);
   }, []);
 
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      setSignInModalInfo({ open: true, reason: "NOT_SIGNED_IN" });
+    }
+  }, []);
+
   // Scroll to bottom on message update or typing
   useEffect(() => {
     if (messagesEndRef.current) {

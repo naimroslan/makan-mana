@@ -5,6 +5,7 @@ export const BACKEND = {
   FILTER: `${API.MAKANMANA.HOSTNAME}/restaurants/`,
   RESTAURANTS: `${API.MAKANMANA.HOSTNAME}/restaurants`,
   CHAT: `${API.MAKANMANA.HOSTNAME}/chat`,
-  LOGIN: `${API.MAKANMANA.HOSTNAME}/admin/login`,
+  ADMIN_LOGIN: `${API.MAKANMANA.HOSTNAME}/admin/login`,
+  USER_LOGIN: `${API.MAKANMANA.HOSTNAME}/auth/google`,
   ANNOUNCEMENT: `${API.MAKANMANA.HOSTNAME}/announcement`,
 };
