@@ -84,8 +84,8 @@ export default function BottomSheet({
 
         {/* Scrollable content */}
         <div
-          className={`overflow-y-auto grow ${
-            withButton && floatingButton ? "pb-24" : "pb-6"
+          className={`overflow-y-auto ${
+            withButton && floatingButton ? "pb-12" : "pb-6"
           }`}
         >
           {children}
