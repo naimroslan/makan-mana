@@ -1,5 +1,3 @@
-import Navbar from "../components/Menu/Navbar";
-
 function About() {
   return (
     <div className="min-h-screen bg-white flex flex-col justify-center items-center px-6 py-10 space-y-8 text-center">
@@ -38,8 +36,6 @@ function About() {
           </p>
         </div>
       </div> */}
-
-      <Navbar className="fixed bottom-0 left-0 right-0 z-50" />
     </div>
   );
 }
