@@ -12,36 +12,29 @@ function Navbar() {
   const active = location.pathname;
 
   const navItems = [
-    { id: "/", icon: RiHome6Fill, label: "Home" },
-    { id: "/lists", icon: RiFileList3Fill, label: "Lists" },
-    { id: "/chat", icon: RiChatAiFill, label: "AI" },
-    { id: "/map", icon: RiMap2Fill, label: "Map" },
-    { id: "/about", icon: RiUserSmileFill, label: "Profile" },
+    { id: "/", icon: RiHome6Fill },
+    { id: "/lists", icon: RiFileList3Fill },
+    { id: "/chat", icon: RiChatAiFill },
+    { id: "/map", icon: RiMap2Fill },
+    { id: "/about", icon: RiUserSmileFill },
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white">
-      <div className="flex justify-around items-center py-2">
-        {navItems.map(({ id, icon: Icon, label }) => {
+    <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
+      <div className="flex gap-4 px-4 py-2 bg-white rounded-full shadow-lg">
+        {navItems.map(({ id, icon: Icon }) => {
           const isActive = active === id;
 
           return (
             <Link
               to={id}
               key={id}
-              className="flex flex-col items-center text-xs transition-colors"
+              className="flex items-center justify-center w-10 h-10 rounded-full"
             >
-              <div className="w-10 h-10 flex items-center justify-center">
-                <Icon
-                  size={24}
-                  className={isActive ? "text-secondary" : "text-text"}
-                />
-              </div>
-              <span
-                className={`text-[11px] ${isActive ? "text-secondary" : "text-text"}`}
-              >
-                {label}
-              </span>
+              <Icon
+                size={22}
+                className={isActive ? "text-secondary" : "text-gray-500"}
+              />
             </Link>
           );
         })}
