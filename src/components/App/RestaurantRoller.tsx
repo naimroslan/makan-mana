@@ -12,7 +12,7 @@ export default function RestaurantRoller({
   onClick,
 }: RestaurantRollerProps) {
   return (
-    <div className="bg-white rounded-2xl overflow-hidden border border-border">
+    <div className="bg-white rounded-t-2xl overflow-hidden border border-border">
       <div className="relative h-[180px] overflow-hidden">
         <div className="absolute inset-x-0 top-0 h-[60px] bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
         <div className="absolute inset-x-0 bottom-0 h-[60px] bg-gradient-to-t from-white to-transparent z-10 pointer-events-none" />
