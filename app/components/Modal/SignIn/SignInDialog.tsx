@@ -3,7 +3,7 @@ import BottomSheet from "../../BottomSheet/BottomSheet";
 import Modal from "../Modal";
 import SignInContent from "./SignInContent";
 
-export default function SignIn({
+const SignIn = ({
   isOpen,
   onClose,
   title,
@@ -13,7 +13,7 @@ export default function SignIn({
   onClose: () => void;
   title: string;
   message: string;
-}) {
+}) => {
   const isMobile = useIsMobile();
 
   const content = (
@@ -29,4 +29,6 @@ export default function SignIn({
       {content}
     </Modal>
   );
-}
+};
+
+export default SignIn;

@@ -1,37 +1,23 @@
+import { useTheme } from "@emotion/react";
 import { useState } from "react";
-import useIsMobile from "~/hooks/useIsMobile";
-import BottomSheet from "~/components/BottomSheet/BottomSheet";
-import Modal from "~/components/Modal/Modal";
+import useIsMobile from "@Hooks/useIsMobile";
+import BottomSheet from "@Components/BottomSheet/BottomSheet";
+import Modal from "@Components/Modal/Modal";
 import FilterContent from "./FilterContent";
+import getStyle from "./FilterDialog.css";
+import type {
+  FilterDialogProps,
+  FilterOption,
+} from "@Types/components/FilterDialog.type";
 
-interface FilterOption {
-  label: string;
-  value: string;
-}
-
-interface FilterDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onApply: (filters: {
-    place: FilterOption[];
-    type: FilterOption[];
-    origin: FilterOption[];
-  }) => void;
-  filterOptions: {
-    place: FilterOption[];
-    type: FilterOption[];
-    origin: FilterOption[];
-  };
-  isLoading?: boolean;
-}
-
-export default function FilterDialog({
+const FilterDialog = ({
   isOpen,
   onClose,
   onApply,
   filterOptions,
   isLoading = false,
-}: FilterDialogProps) {
+}: FilterDialogProps) => {
+  const theme = useTheme();
   const isMobile = useIsMobile();
   const [selected, setSelected] = useState({
     city: [],
@@ -54,28 +40,22 @@ export default function FilterDialog({
     onClose();
   };
 
+  const styles = getStyle(theme, { hasSelections, isLoading });
+
   const buttonGroup = (
-    <div className="w-full px-4 pb-4">
-      <div className="flex justify-center items-center gap-4">
+    <div css={styles.buttonContainer}>
+      <div css={styles.buttonRow}>
         <button
           onClick={handleClear}
           disabled={isLoading || !hasSelections}
-          className={`w-1/2 py-2 rounded-full font-medium transition-colors shadow-md ${
-            hasSelections && !isLoading
-              ? "bg-white text-primary hover:bg-primary-light"
-              : "bg-white text-gray cursor-not-allowed"
-          }`}
+          css={styles.clearButton}
         >
           Clear
         </button>
         <button
           onClick={handleApply}
           disabled={isLoading || !hasSelections}
-          className={`w-1/2 py-2 rounded-full font-medium transition-colors shadow-md ${
-            hasSelections && !isLoading
-              ? "bg-primary text-white hover:bg-primary/90"
-              : "bg-muted text-white cursor-not-allowed"
-          }`}
+          css={styles.applyButton}
         >
           {isLoading ? "Applying..." : "Apply"}
         </button>
@@ -107,11 +87,13 @@ export default function FilterDialog({
       {content}
     </BottomSheet>
   ) : (
-    <Modal isOpen={isOpen} onClose={onClose} scrollable width="max-w-md">
-      <div className="p-4">
+    <Modal isOpen={isOpen} onClose={onClose} scrollable width="28rem">
+      <div css={styles.modalBody}>
         {content}
         {buttonGroup}
       </div>
     </Modal>
   );
-}
+};
+
+export default FilterDialog;

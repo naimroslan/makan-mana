@@ -1,8 +1,8 @@
-import { FiBell, FiMail } from "react-icons/fi";
+// import { FiBell, FiMail } from "react-icons/fi";s
 import { useTheme } from "@emotion/react";
 import getStyle from "./Header.css";
 
-export default function Header() {
+const Header = () => {
   const theme = useTheme();
   const styles = getStyle(theme);
 
@@ -14,14 +14,16 @@ export default function Header() {
         favorite place
       </h1>
 
-      <div css={styles.actions}>
+      {/*<div css={styles.actions}>
         <button css={styles.iconButton}>
           <FiBell size={18} />
         </button>
         <button css={styles.iconButton}>
           <FiMail size={18} />
         </button>
-      </div>
+      </div>*/}
     </header>
   );
-}
+};
+
+export default Header;

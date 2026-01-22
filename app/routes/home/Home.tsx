@@ -13,11 +13,11 @@ import { readStoredLocation, storeLocation } from "@Configs/location";
 import { ROLL_DURATION, VISIBLE_ITEM_HEIGHT } from "@Utils/constants";
 import Header from "@Components/Header/Header";
 import FilterDialog from "@Components/Modal/Filter/FilterDialog";
-import FiltersHeader from "@Components/App/FiltersHeader";
-import RestaurantRoller from "@Components/App/RestaurantRoller";
-import SearchBar from "@Components/App/SearchBar";
+import FiltersHeader from "@Components/FiltersHeader/FiltersHeader";
+import RestaurantRoller from "@Components/RestaurantRoller/RestaurantRoller";
+import SearchBar from "@Components/SearchBar/SearchBar";
 import { useUserTier } from "@Hooks/useUserTier";
-import PlaceStatus from "@Components/App/PlaceStatus";
+import PlaceStatus from "@Components/PlaceStatus/PlaceStatus";
 import getStyle from "./Home.css";
 
 const Home = () => {
@@ -178,7 +178,7 @@ const Home = () => {
       <main css={styles.main}>
         <div css={styles.content}>
           <Header />
-          <SearchBar value={search} onChange={setSearch} onSearch={onSearch} />
+          {/*<SearchBar value={search} onChange={setSearch} onSearch={onSearch} />*/}
 
           <FiltersHeader
             hasActiveFilters={hasActiveFilters}

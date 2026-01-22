@@ -2,7 +2,7 @@ import GoogleSignInButton from "~/components/Button/GoogleSignInButton";
 import { BACKEND } from "~/utils/api";
 import { useAuth } from "~/context/AuthContext"; // Import useAuth
 
-export default function SignInContent({
+const SignInContent = ({
   title,
   message,
   onClose,
@@ -10,7 +10,7 @@ export default function SignInContent({
   title: string;
   message: string;
   onClose: () => void;
-}) {
+}) => {
   const { login } = useAuth(); // Get login function from context
 
   const handleSuccess = async (credentialResponse: any) => {
@@ -54,4 +54,6 @@ export default function SignInContent({
       </div>
     </div>
   );
-}
+};
+
+export default SignInContent;

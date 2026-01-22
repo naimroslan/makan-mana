@@ -1,37 +1,42 @@
-import type { ReactNode } from "react";
+import { css, useTheme } from "@emotion/react";
+import type { ModalProps } from "@Types/components/Modal.type";
+import getStyle from "./Modal.css";
 
-interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  children: ReactNode;
-  scrollable?: boolean;
-  width?: string;
-  className?: string;
-}
+const widthMap: Record<string, string> = {
+  "max-w-sm": "24rem",
+  "max-w-md": "28rem",
+  "max-w-lg": "32rem",
+};
 
-export default function Modal({
+const Modal = ({
   isOpen,
   onClose,
   children,
   scrollable = false,
-  width = "max-w-lg",
-  className = "",
-}: ModalProps) {
+  width = "32rem",
+  className,
+}: ModalProps) => {
+  const theme = useTheme();
+
   if (!isOpen) return null;
 
+  const resolvedWidth =
+    typeof width === "number"
+      ? `${width}px`
+      : (widthMap[width] ?? width ?? "32rem");
+
+  const styles = getStyle(theme, resolvedWidth, scrollable);
+
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-      <div
-        className={`relative w-full ${width} bg-white rounded-2xl p-6 shadow-xl border border-border ${className} ${scrollable ? "max-h-[80vh] overflow-y-auto" : ""}`}
-      >
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-4 text-gray hover:text-primary text-xl"
-        >
+    <div css={styles.overlay}>
+      <div css={styles.dialog} className={className}>
+        <button onClick={onClose} css={styles.close} aria-label="Close modal">
           ×
         </button>
         {children}
       </div>
     </div>
   );
-}
+};
+
+export default Modal;

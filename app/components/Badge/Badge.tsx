@@ -1,19 +1,12 @@
-type BadgeProps = {
-  label: string;
-  bgColor?: string;
-  textColor?: string;
+import { css, useTheme } from "@emotion/react";
+import type { BadgeProps } from "@Types/components/Badge.type";
+import getStyle from "./Badge.css";
+
+const Badge = ({ label, bgColor, textColor }: BadgeProps) => {
+  const theme = useTheme();
+  const styles = getStyle(theme, bgColor, textColor);
+
+  return <span css={styles.label}>{label}</span>;
 };
 
-export default function Badge({
-  label,
-  bgColor = "bg-gray-200",
-  textColor = "text-gray-800",
-}: BadgeProps) {
-  return (
-    <span
-      className={`inline-block px-3 py-1 text-xs font-medium rounded-full ${bgColor} ${textColor}`}
-    >
-      {label}
-    </span>
-  );
-}
+export default Badge;

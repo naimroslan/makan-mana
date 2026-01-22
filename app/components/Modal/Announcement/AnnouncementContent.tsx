@@ -1,27 +1,6 @@
-type Announcement = {
-  id: string;
-  title: string;
-  announcement: {
-    content: {
-      value: any;
-      links: any[];
-      inlineBlocks: any[];
-      blocks: any[];
-    };
-  };
-};
+import type { Props } from "@Types/components/AnnouncementContent.type";
 
-interface Props {
-  announcements: Announcement[];
-  current: number;
-  setCurrent: (i: number) => void;
-}
-
-export default function AnnouncementContent({
-  announcements,
-  current,
-  setCurrent,
-}: Props) {
+const AnnouncementContent = ({ announcements, current, setCurrent }: Props) => {
   const currentAnnouncement = announcements[current];
 
   return (
@@ -58,4 +37,6 @@ export default function AnnouncementContent({
       )}
     </div>
   );
-}
+};
+
+export default AnnouncementContent;

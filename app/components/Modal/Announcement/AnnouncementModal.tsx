@@ -1,22 +1,10 @@
 import { useEffect, useState } from "react";
-import Modal from "../Modal";
-import { BACKEND } from "../../../utils/api";
+import Modal from "@Components/Modal/Modal";
+import { BACKEND } from "@Utils/api";
 import AnnouncementContent from "./AnnouncementContent";
+import type { Announcement } from "@Types/components/AnnouncementContent.type";
 
-type Announcement = {
-  id: string;
-  title: string;
-  announcement: {
-    content: {
-      value: any;
-      links: any[];
-      inlineBlocks: any[];
-      blocks: any[];
-    };
-  };
-};
-
-export default function AnnouncementModal() {
+const AnnouncementModal = () => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [current, setCurrent] = useState(0);
 
@@ -43,4 +31,6 @@ export default function AnnouncementModal() {
       />
     </Modal>
   );
-}
+};
+
+export default AnnouncementModal;

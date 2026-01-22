@@ -1,17 +1,9 @@
+import { css, useTheme } from "@emotion/react";
 import { useEffect, useRef, useState } from "react";
-import type { ReactNode } from "react";
 import gsap from "gsap";
 import { createPortal } from "react-dom";
-
-interface BottomSheetProps {
-  isOpen: boolean;
-  onClose: () => void;
-  children: ReactNode;
-  withButton?: boolean;
-  floatingButton?: boolean;
-  buttonContent?: ReactNode;
-  size?: "sm" | "md" | "lg";
-}
+import type { BottomSheetProps } from "@Types/components/BottomSheet.type";
+import getStyle from "@Components/BottomSheet/BottomSheet.css";
 
 const SIZE_HEIGHT_MAP: Record<NonNullable<BottomSheetProps["size"]>, string> = {
   sm: "15%",
@@ -19,7 +11,7 @@ const SIZE_HEIGHT_MAP: Record<NonNullable<BottomSheetProps["size"]>, string> = {
   lg: "50%",
 };
 
-export default function BottomSheet({
+const BottomSheet = ({
   isOpen,
   onClose,
   children,
@@ -27,11 +19,15 @@ export default function BottomSheet({
   floatingButton = true,
   buttonContent,
   size = "md",
-}: BottomSheetProps) {
+}: BottomSheetProps) => {
+  const theme = useTheme();
+
   const sheetRef = useRef<HTMLDivElement>(null);
   const backdropRef = useRef<HTMLDivElement>(null);
   const [canClose, setCanClose] = useState(false);
   const height = SIZE_HEIGHT_MAP[size];
+
+  const styles = getStyle(theme, height, withButton, floatingButton);
 
   useEffect(() => {
     if (isOpen) {
@@ -66,41 +62,24 @@ export default function BottomSheet({
   if (!isOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-50 overflow-hidden">
+    <div css={styles.overlay}>
       {/* Backdrop */}
       <div
         ref={backdropRef}
-        className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+        css={styles.backdrop}
         onClick={canClose ? onClose : undefined}
       />
 
       {/* Sheet */}
-      <div
-        ref={sheetRef}
-        className="absolute bottom-0 w-full rounded-t-3xl bg-white px-4 pt-4 pb-6 shadow-xl flex flex-col"
-        style={{ height }}
-      >
-        {/* Handle */}
-        <div className="h-1.5 w-10 bg-gray-300 rounded-full mx-auto mb-4" />
+      <div ref={sheetRef} css={styles.sheet}>
+        <div css={styles.handle} />
 
-        {/* Scrollable content */}
-        <div
-          className={`overflow-y-auto ${
-            withButton && floatingButton ? "pb-12" : "pb-6"
-          }`}
-        >
-          {children}
-        </div>
+        <div css={styles.content}>{children}</div>
 
-        {/* Button */}
         {withButton && buttonContent && (
-          <div
-            className={`${
-              floatingButton ? "absolute inset-x-4 bottom-6" : "mt-4 px-4"
-            }`}
-          >
+          <div css={styles.buttonWrapper}>
             <button
-              className="w-full py-3 rounded-xl bg-primary text-white font-semibold"
+              css={styles.button}
               onClick={
                 typeof buttonContent === "object" && "props" in buttonContent
                   ? buttonContent.props?.onClick
@@ -115,4 +94,6 @@ export default function BottomSheet({
     </div>,
     document.body,
   );
-}
+};
+
+export default BottomSheet;
